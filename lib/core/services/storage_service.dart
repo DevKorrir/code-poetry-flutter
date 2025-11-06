@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/poem_model.dart';
+import '../../models/poem_model.dart';
 
 /// Storage Service
 /// Handles both local storage (Hive) and cloud storage (Firestore)
