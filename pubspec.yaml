@@ -1,4 +1,4 @@
-name: code_poetry
+name: codepoetry
 description: Transform your code into beautiful poetry. AI-powered poetry generation for developers.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

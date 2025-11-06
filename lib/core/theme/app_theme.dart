@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'constants/app_colors.dart';
 import 'text_styles.dart';
 
 /// App Theme Configuration
