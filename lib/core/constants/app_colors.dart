@@ -196,13 +196,13 @@ class AppColors {
 
   /// Create a gradient from any two colors
   static LinearGradient customGradient(
-      Color start,
-      Color end, {
+      Color startColor,
+      Color endColor, {
         AlignmentGeometry begin = Alignment.topLeft,
         AlignmentGeometry end = Alignment.bottomRight,
       }) {
     return LinearGradient(
-      colors: [start, end],
+      colors: [startColor, endColor],
       begin: begin,
       end: end,
     );

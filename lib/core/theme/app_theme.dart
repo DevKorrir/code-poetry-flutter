@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'constants/app_colors.dart';
+import '../constants/app_colors.dart';
 import 'text_styles.dart';
 
 /// App Theme Configuration
@@ -49,7 +49,7 @@ class AppTheme {
     ),
 
     // Card
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.darkSurface,
       elevation: 4,
       shadowColor: AppColors.shadowDark,
@@ -145,7 +145,7 @@ class AppTheme {
     ),
 
     // Dialog
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: AppColors.darkSurface,
       elevation: 8,
       shape: RoundedRectangleBorder(
@@ -250,7 +250,7 @@ class AppTheme {
     ),
 
     // Card
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.lightSurface,
       elevation: 2,
       shadowColor: AppColors.shadowLight,
@@ -347,7 +347,7 @@ class AppTheme {
     ),
 
     // Dialog
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: AppColors.lightSurface,
       elevation: 8,
       shape: RoundedRectangleBorder(

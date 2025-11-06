@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
+import '../constants/app_colors.dart';
 
 /// Text Styles for Code Poetry
 /// Defines typography system with three font families:
@@ -7,7 +7,7 @@ import 'app_colors.dart';
 /// - Spectral: For poetry
 /// - System Default: For UI elements
 class AppTextStyles {
-  AppTextStyles._();
+  const AppTextStyles();
 
   // ============================================================
   // FONT FAMILIES
