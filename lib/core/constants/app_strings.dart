@@ -120,6 +120,7 @@ class AppStrings {
   static const String poemReadAloud = 'Read Aloud';
   static const String poemSaved = 'Poem saved to gallery';
   static const String poemShared = 'Poem shared';
+  static const String successMessage = 'Poem suxxess';
 
   // ============================================================
   // GALLERY
