@@ -22,19 +22,6 @@ class ApiService {
       throw Exception('GEMINI_API_KEY not found in .env file');
     }
     _client = http.Client();
-    // --- ADD THIS FOR TESTING ---
-    try {
-      final models = await getAvailableModels();
-      print("--- AVAILABLE MODELS ---");
-      for (var model in models) {
-        print(model);
-      }
-      print("-------------------------");
-    } catch (e) {
-      print("Could not list models: $e");
-    }
-    // --- END OF TEST CODE ---
-
   }
 
   /// Generate poem from code
@@ -171,7 +158,9 @@ STYLE: CREATIVE
   /// Make HTTP request to Gemini API
   Future<Map<String, dynamic>> _makeRequest(String prompt) async {
     final url = Uri.parse(
-      '$_baseUrl/models/gemini-pro-latest:generateContent?key=$_apiKey',
+                       //gemini-pro-latest
+                       //gemini-2.0-flash
+      '$_baseUrl/models/gemini-2.0-flash:generateContent?key=$_apiKey',
     );
 
     final body = jsonEncode({
@@ -229,22 +218,48 @@ STYLE: CREATIVE
   /// Extract poem text from Gemini response
   String _extractPoemFromResponse(Map<String, dynamic> response) {
     try {
-      final candidates = response['candidates'] as List<dynamic>;
-      if (candidates.isEmpty) {
-        throw ApiException('No poem generated');
+      // Check for null *before* casting.
+      // Use 'as List?' to allow for a null value.
+      final candidates = response['candidates'] as List?;
+
+      // Check if the list is null or empty
+      if (candidates == null || candidates.isEmpty) {
+
+        // Check if the API returned a safety block instead
+        if (response.containsKey('promptFeedback')) {
+          final feedback = response['promptFeedback'];
+          final blockReason = feedback['blockReason'] ?? 'Unknown safety block';
+          throw ApiException('Poem blocked: $blockReason. Adjust safety settings or prompt.');
+        }
+
+        // If not a safety block, just no poem
+        throw ApiException('No poem generated (empty candidates list)');
       }
 
-      final content = candidates[0]['content'] as Map<String, dynamic>;
-      final parts = content['parts'] as List<dynamic>;
-      if (parts.isEmpty) {
-        throw ApiException('Empty response from API');
+      // Use safe casting for maps and lists
+      final content = candidates[0]['content'] as Map<String, dynamic>?;
+      if (content == null) {
+        throw ApiException('Failed to parse: "content" key is missing or null');
       }
 
-      final text = parts[0]['text'] as String;
+      final parts = content['parts'] as List?;
+      if (parts == null || parts.isEmpty) {
+        throw ApiException('Failed to parse: "parts" list is missing or empty');
+      }
+
+      final text = parts[0]['text'] as String?;
+      if (text == null) {
+        throw ApiException('Failed to parse: "text" is missing or null');
+      }
 
       // Clean up the poem text
       return _cleanPoem(text);
+
     } catch (e) {
+      // If it's already an ApiException, just re-throw it
+      if (e is ApiException) rethrow;
+
+      // Otherwise, wrap the casting error
       throw ApiException('Failed to parse API response: ${e.toString()}');
     }
   }
