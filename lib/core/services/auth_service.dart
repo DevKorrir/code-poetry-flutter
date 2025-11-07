@@ -13,7 +13,10 @@ class AuthService {
 
   // Firebase instances
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Modern, Corrected Initialization
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+
 
   // Current user stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -123,10 +126,10 @@ class AuthService {
   /// Throws: [AuthException] on failure
   Future<UserModel> signInWithGoogle() async {
     try {
-      // Trigger Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
 
       if (googleUser == null) {
+        // This generally indicates user cancellation.
         throw AuthException('Google sign in cancelled');
       }
 
@@ -134,9 +137,9 @@ class AuthService {
       final GoogleSignInAuthentication googleAuth =
       await googleUser.authentication;
 
-      // Create credential
+      // FIX 3/7: Create credential using ID Token ONLY.
+      // accessToken is removed by default in V7.0+ as it's not needed for Firebase Auth.
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
@@ -286,22 +289,35 @@ class AuthService {
     }
   }
 
+
   /// Update email
   Future<void> updateEmail(String newEmail) async {
-    try {
-      if (currentUser == null) {
-        throw AuthException('No user signed in');
-      }
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw AuthException('No user signed in');
+    }
 
-      _validateEmail(newEmail);
-      await currentUser!.updateEmail(newEmail);
-      await currentUser!.reload();
+    _validateEmail(newEmail);
+
+    try {
+      // ✅ FIX: Use verifyBeforeUpdateEmail() instead of updateEmail()
+      // This is the modern Firebase Auth approach that sends a verification email first
+      await user.verifyBeforeUpdateEmail(newEmail);
+
+      // Note: The email won't be updated immediately. The user needs to
+      // verify the new email address via the link sent to them.
+      // After verification, they should sign in again for the change to take effect.
+
     } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw AuthException('requires-recent-login');
+      }
       throw AuthException(_getErrorMessage(e.code));
     } catch (e) {
       throw AuthException('Failed to update email: ${e.toString()}');
     }
   }
+
 
   /// Send email verification
   Future<void> sendEmailVerification() async {
@@ -336,10 +352,10 @@ class AuthService {
   /// Sign out current user
   Future<void> signOut() async {
     try {
-      // Sign out from Google if signed in
-      if (await _googleSignIn.isSignedIn()) {
-        await _googleSignIn.signOut();
-      }
+      // ✅ FIX: In v7.2.0, there's no currentUser getter anymore!
+      // Just call signOut() - it handles checking internally
+      // It's safe to call even if no Google user is signed in
+      await _googleSignIn.signOut();
 
       // Sign out from Firebase
       await _auth.signOut();
@@ -347,6 +363,7 @@ class AuthService {
       throw AuthException('Sign out failed: ${e.toString()}');
     }
   }
+
 
   /// Delete current user account
   Future<void> deleteAccount() async {
@@ -397,7 +414,9 @@ class AuthService {
         throw AuthException('No user signed in');
       }
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      // ✅ FIX: Use await with authenticate (was already correct)
+      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
+
       if (googleUser == null) {
         throw AuthException('Google sign in cancelled');
       }
@@ -406,7 +425,6 @@ class AuthService {
       await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 

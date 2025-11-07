@@ -14,21 +14,21 @@ class ConnectivityService extends ChangeNotifier {
   final Connectivity _connectivity = Connectivity();
 
   // Current connectivity status
-  ConnectivityResult _connectionStatus = ConnectivityResult.none;
-  ConnectivityResult get connectionStatus => _connectionStatus;
+  List<ConnectivityResult> _connectionStatus = const [ConnectivityResult.none];
+  List<ConnectivityResult> get connectionStatus => _connectionStatus;
 
   // Stream subscription
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   // Connection state
   bool get isConnected =>
-      _connectionStatus != ConnectivityResult.none;
+      !_connectionStatus.contains(ConnectivityResult.none);
 
-  bool get isWifi => _connectionStatus == ConnectivityResult.wifi;
+  bool get isWifi => _connectionStatus.contains(ConnectivityResult.wifi);
 
-  bool get isMobile => _connectionStatus == ConnectivityResult.mobile;
+  bool get isMobile => _connectionStatus.contains(ConnectivityResult.mobile);
 
-  bool get isEthernet => _connectionStatus == ConnectivityResult.ethernet;
+  bool get isEthernet => _connectionStatus.contains(ConnectivityResult.ethernet);
 
   // Callbacks for connection changes
   final List<VoidCallback> _onConnectedCallbacks = [];
@@ -53,10 +53,9 @@ class ConnectivityService extends ChangeNotifier {
   }
 
   /// Update connection status
-  void _updateConnectionStatus(ConnectivityResult result) {
+  void _updateConnectionStatus(List<ConnectivityResult> result) {
     final wasConnected = isConnected;
     _connectionStatus = result;
-
     // Trigger callbacks
     if (isConnected && !wasConnected) {
       _triggerOnConnectedCallbacks();
@@ -76,7 +75,7 @@ class ConnectivityService extends ChangeNotifier {
     try {
       final result = await _connectivity.checkConnectivity();
       _updateConnectionStatus(result);
-      return result != ConnectivityResult.none;
+      return !result.contains(ConnectivityResult.none);
     } catch (e) {
       debugPrint('Failed to check connectivity: $e');
       return false;
@@ -150,24 +149,29 @@ class ConnectivityService extends ChangeNotifier {
 
   /// Get connection type as string
   String getConnectionType() {
-    switch (_connectionStatus) {
-      case ConnectivityResult.wifi:
-        return 'WiFi';
-      case ConnectivityResult.mobile:
-        return 'Mobile Data';
-      case ConnectivityResult.ethernet:
-        return 'Ethernet';
-      case ConnectivityResult.bluetooth:
-        return 'Bluetooth';
-      case ConnectivityResult.vpn:
-        return 'VPN';
-      case ConnectivityResult.none:
-        return 'No Connection';
-      case ConnectivityResult.other:
-        return 'Other';
-      default:
-        return 'Unknown';
+    // ogic updated to check the list for the primary connection type
+    if (_connectionStatus.contains(ConnectivityResult.ethernet)) {
+      return 'Ethernet';
     }
+    if (_connectionStatus.contains(ConnectivityResult.wifi)) {
+      return 'WiFi';
+    }
+    if (_connectionStatus.contains(ConnectivityResult.mobile)) {
+      return 'Mobile Data';
+    }
+    if (_connectionStatus.contains(ConnectivityResult.vpn)) {
+      return 'VPN';
+    }
+    if (_connectionStatus.contains(ConnectivityResult.bluetooth)) {
+      return 'Bluetooth';
+    }
+    if (_connectionStatus.contains(ConnectivityResult.none)) {
+      return 'No Connection';
+    }
+    if (_connectionStatus.contains(ConnectivityResult.other)) {
+      return 'Other';
+    }
+    return 'Unknown';
   }
 
   /// Get user-friendly connection message
@@ -194,12 +198,12 @@ class ConnectivityService extends ChangeNotifier {
   // ============================================================
 
   /// Get connectivity stream
-  Stream<ConnectivityResult> get connectivityStream =>
+  Stream<List<ConnectivityResult>> get connectivityStream =>
       _connectivity.onConnectivityChanged;
 
   /// Get boolean connectivity stream (connected/disconnected)
   Stream<bool> get isConnectedStream =>
-      connectivityStream.map((result) => result != ConnectivityResult.none);
+      connectivityStream.map((results) => !results.contains(ConnectivityResult.none));
 
   // ============================================================
   // WAIT FOR CONNECTION
@@ -331,19 +335,19 @@ class NoConnectionException implements Exception {
 /// Connectivity Status Model (for easier state management)
 class ConnectivityStatus {
   final bool isConnected;
-  final ConnectivityResult result;
+  final List<ConnectivityResult> results;
   final String message;
 
   ConnectivityStatus({
     required this.isConnected,
-    required this.result,
+    required this.results,
     required this.message,
   });
 
-  factory ConnectivityStatus.connected(ConnectivityResult result) {
+  factory ConnectivityStatus.connected(List<ConnectivityResult> results) {
     return ConnectivityStatus(
       isConnected: true,
-      result: result,
+      results: results,
       message: 'Connected',
     );
   }
@@ -351,7 +355,7 @@ class ConnectivityStatus {
   factory ConnectivityStatus.disconnected() {
     return ConnectivityStatus(
       isConnected: false,
-      result: ConnectivityResult.none,
+      results: const [ConnectivityResult.none],
       message: 'No internet connection',
     );
   }

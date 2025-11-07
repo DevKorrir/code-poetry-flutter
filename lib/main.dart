@@ -1,3 +1,5 @@
+import 'package:codepoetry/views/screens/home/home_screen.dart';
+import 'package:codepoetry/views/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -106,7 +108,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: settingsViewModel.themeMode,
-      home: const SplashScreen(), // You'll create this next
+      home: const HomeScreen(),
     );
   }
 }
