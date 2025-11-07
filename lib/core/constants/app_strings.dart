@@ -43,6 +43,8 @@ class AppStrings {
   static const String loginSignUp = 'Sign Up';
   static const String loginWithGoogle = 'Continue with Google';
   static const String loginAsGuest = 'Continue as Guest';
+  static const String loginHaveAccount = 'Correct here';
+  static const String loginSignIn = 'Correct here';
 
   static const String signupTitle = 'Create Account';
   static const String signupSubtitle = 'Join the poetry revolution';
