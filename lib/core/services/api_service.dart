@@ -16,12 +16,25 @@ class ApiService {
   late final http.Client _client;
 
   /// Initialize the service with API key from .env
-  void initialize() {
+  void initialize() async {
     _apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
     if (_apiKey.isEmpty) {
       throw Exception('GEMINI_API_KEY not found in .env file');
     }
     _client = http.Client();
+    // --- ADD THIS FOR TESTING ---
+    try {
+      final models = await getAvailableModels();
+      print("--- AVAILABLE MODELS ---");
+      for (var model in models) {
+        print(model);
+      }
+      print("-------------------------");
+    } catch (e) {
+      print("Could not list models: $e");
+    }
+    // --- END OF TEST CODE ---
+
   }
 
   /// Generate poem from code
@@ -158,7 +171,7 @@ STYLE: CREATIVE
   /// Make HTTP request to Gemini API
   Future<Map<String, dynamic>> _makeRequest(String prompt) async {
     final url = Uri.parse(
-      '$_baseUrl/models/gemini-1.5-flash:generateContent?key=$_apiKey',
+      '$_baseUrl/models/gemini-pro-latest:generateContent?key=$_apiKey',
     );
 
     final body = jsonEncode({
@@ -206,6 +219,7 @@ STYLE: CREATIVE
     if (response.statusCode != 200) {
       throw ApiException(
         'API request failed with status ${response.statusCode}: ${response.body}',
+        //print('API request failed with status ${response.statusCode}: ${response.body}');
       );
     }
 

@@ -104,11 +104,12 @@ class MyApp extends StatelessWidget {
     final settingsViewModel = context.watch<SettingsViewModel>();
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Code Poetry',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: settingsViewModel.themeMode,
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
