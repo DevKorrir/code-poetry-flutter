@@ -107,11 +107,11 @@ Launch → Onboarding → Auth → Home → Create Poem
 
 | Onboarding | Style Selector | Poem Display |
 |:---:|:---:|:---:|
-| ![Onboarding](https://via.placeholder.com/250x500/667eea/ffffff?text=Onboarding) | ![Styles](https://via.placeholder.com/250x500/4facfe/ffffff?text=Style+Selector) | ![Poem](https://via.placeholder.com/250x500/f093fb/ffffff?text=Poem+Display) |
+| ![Onboarding](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/code_imput.png) | ![Styles](https://via.placeholder.com/250x500/4facfe/ffffff?text=Style+Selector) | ![Poem](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/poem_display.png) |
 
 | Home Dashboard | Code Input | Gallery |
 |:---:|:---:|:---:|
-| ![Home](https://via.placeholder.com/250x500/764ba2/ffffff?text=Home) | ![Input](https://via.placeholder.com/250x500/43e97b/ffffff?text=Code+Input) | ![Gallery](https://via.placeholder.com/250x500/fee140/ffffff?text=Gallery) |
+| ![Home](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/home.png) | ![Input](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/code_imput.png) | ![Gallery](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/gallery.png) |
 
 </div>
 
