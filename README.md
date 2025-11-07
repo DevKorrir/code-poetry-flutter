@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Code Poetry Banner](https://via.placeholder.com/1200x400/667eea/ffffff?text=Code+Poetry+-+Where+Logic+Meets+Emotion)
+![Code Poetry Banner](assets/banner.png)
 
 **Transform your code into beautiful poetry with AI** ✨
 
