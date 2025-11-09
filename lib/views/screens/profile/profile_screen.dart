@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../../viewmodels/auth_viewmodel.dart';
-import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 import '../auth/login_screen.dart';
 import '../pro_upgrade/pro_upgrade_screen.dart';
@@ -190,14 +189,14 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 12),
 
         // Change Password (only for email users)
-        // if (!authViewModel.isGuest && authViewModel.hasPasswordProvider())
-        //   _buildActionTile(
-        //     icon: Icons.lock_outline,
-        //     title: 'Change Password',
-        //     subtitle: 'Update your password',
-        //     onTap: () => _showChangePasswordDialog(context, authViewModel),
-        //     isDark: isDark,
-        //   ),
+        if (!authViewModel.isGuest && authViewModel.hasPasswordProvider())
+          _buildActionTile(
+            icon: Icons.lock_outline,
+            title: 'Change Password',
+            subtitle: 'Update your password',
+            onTap: () => _showChangePasswordDialog(context, authViewModel),
+            isDark: isDark,
+          ),
 
         const SizedBox(height: 12),
 
