@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/feature_limits.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../../viewmodels/auth_viewmodel.dart';
 import '../../widgets/common/custom_button.dart';
@@ -425,15 +426,51 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen>
           const SizedBox(height: 20),
 
           // Features
-          _buildFeatureRow('Poems per day', '5', 'Unlimited'),
-          _buildFeatureRow('Poetry styles', '4', '4'),
-          _buildFeatureRow('Save poems', true, true),
-          _buildFeatureRow('Cloud sync', true, true),
-          _buildFeatureRow('Voice reading', false, true),
-          _buildFeatureRow('Export as image', false, true),
-          _buildFeatureRow('Custom styles', false, true),
-          _buildFeatureRow('No watermark', false, true),
-          _buildFeatureRow('Priority support', false, true),
+          _buildFeatureRow(
+            'Poems per day',
+            FeatureLimits.freePoemsPerDayDisplay,
+            FeatureLimits.proPoemsPerDay,
+          ),
+          _buildFeatureRow(
+            'Poetry styles',
+            FeatureLimits.freePoetryStylesDisplay,
+            FeatureLimits.proPoetryStylesDisplay,
+          ),
+          _buildFeatureRow(
+            'Save poems',
+            FeatureLimits.freeSavePoems,
+            FeatureLimits.proSavePoems,
+          ),
+          _buildFeatureRow(
+            'Cloud sync',
+            FeatureLimits.freeCloudSync,
+            FeatureLimits.proCloudSync,
+          ),
+          _buildFeatureRow(
+            'Voice reading',
+            FeatureLimits.freeVoiceReading,
+            FeatureLimits.proVoiceReading,
+          ),
+          _buildFeatureRow(
+            'Export as image',
+            FeatureLimits.freeExportAsImage,
+            FeatureLimits.proExportAsImage,
+          ),
+          _buildFeatureRow(
+            'Custom styles',
+            FeatureLimits.freeCustomStyles,
+            FeatureLimits.proCustomStyles,
+          ),
+          _buildFeatureRow(
+            'No watermark',
+            FeatureLimits.freeNoWatermark,
+            FeatureLimits.proNoWatermark,
+          ),
+          _buildFeatureRow(
+            'Priority support',
+            FeatureLimits.freePrioritySupport,
+            FeatureLimits.proPrioritySupport,
+          ),
         ],
       ),
     );
