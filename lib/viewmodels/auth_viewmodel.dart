@@ -51,6 +51,9 @@ class AuthViewModel extends ChangeNotifier {
   /// Get user email
   String? get email => _currentUser?.email;
 
+  /// Check if user has password provider (can change password)
+  bool hasPasswordProvider() => _authRepository.hasPasswordProvider();
+
   // ============================================================
   // INITIALIZATION
   // ============================================================

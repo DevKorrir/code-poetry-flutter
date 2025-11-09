@@ -245,7 +245,7 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
           borderRadius: BorderRadius.circular(24),
           child: Container(
             decoration: BoxDecoration(
-              gradient: _getStyleGradient(style.name),
+              gradient: PoetryStyleColors.getGradient(style.name),
             ),
             child: Stack(
               children: [
@@ -341,37 +341,6 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
         ),
       ),
     );
-  }
-
-  LinearGradient _getStyleGradient(String styleName) {
-    switch (styleName.toLowerCase()) {
-      case 'haiku':
-        return const LinearGradient(
-          colors: [Color(0xFF4FACFE), Color(0xFF38F9D7)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      case 'sonnet':
-        return const LinearGradient(
-          colors: [Color(0xFF764BA2), Color(0xFFFFD700)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      case 'free verse':
-        return const LinearGradient(
-          colors: [Color(0xFFF093FB), Color(0xFFF5576C)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      case 'cyberpunk':
-        return const LinearGradient(
-          colors: [Color(0xFF00F2FE), Color(0xFF43E97B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      default:
-        return AppColors.primaryGradient;
-    }
   }
 
   String _getExamplePoem(String styleName) {

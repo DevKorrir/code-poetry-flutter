@@ -2,6 +2,13 @@ import 'package:flutter/foundation.dart';
 import '../models/poem_model.dart';
 import '../repositories/poem_repository.dart';
 
+enum SortOption {
+  newestFirst,
+  oldestFirst,
+  favoritesFirst,
+  byStyle,
+}
+
 class GalleryViewModel extends ChangeNotifier {
   final PoemRepository _poemRepository;
 
@@ -19,6 +26,9 @@ class GalleryViewModel extends ChangeNotifier {
 
   String? _selectedStyleFilter;
   String? get selectedStyleFilter => _selectedStyleFilter;
+
+  SortOption _sortOption = SortOption.newestFirst;
+  SortOption get sortOption => _sortOption;
 
   // ============================================================
   // LOAD POEMS
@@ -40,6 +50,15 @@ class GalleryViewModel extends ChangeNotifier {
 
   Future<void> refreshPoems() async {
     await loadPoems();
+  }
+
+  // ============================================================
+  // SORTING
+  // ============================================================
+
+  void setSortOption(SortOption option) {
+    _sortOption = option;
+    notifyListeners();
   }
 
   // ============================================================
@@ -67,12 +86,37 @@ class GalleryViewModel extends ChangeNotifier {
   }
 
   List<PoemModel> get filteredPoems {
-    if (_selectedStyleFilter == null) {
-      return _poems;
+    // First apply style filter
+    List<PoemModel> result = _selectedStyleFilter == null
+        ? List.from(_poems)
+        : _poems.where((poem) => poem.style == _selectedStyleFilter).toList();
+
+    // Then apply sorting
+    switch (_sortOption) {
+      case SortOption.newestFirst:
+        result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case SortOption.oldestFirst:
+        result.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case SortOption.favoritesFirst:
+        result.sort((a, b) {
+          if (a.isFavorite == b.isFavorite) {
+            return b.createdAt.compareTo(a.createdAt); // Secondary sort by date
+          }
+          return a.isFavorite ? -1 : 1; // Favorites first
+        });
+        break;
+      case SortOption.byStyle:
+        result.sort((a, b) {
+          final styleCompare = a.style.compareTo(b.style);
+          if (styleCompare != 0) return styleCompare;
+          return b.createdAt.compareTo(a.createdAt); // Secondary sort by date
+        });
+        break;
     }
-    return _poems
-        .where((poem) => poem.style == _selectedStyleFilter)
-        .toList();
+
+    return result;
   }
 
   // ============================================================
