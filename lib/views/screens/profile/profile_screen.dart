@@ -7,6 +7,7 @@ import '../../../viewmodels/auth_viewmodel.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 import '../auth/login_screen.dart';
+import '../pro_upgrade/pro_upgrade_screen.dart';
 
 /// Profile Screen - Complete
 /// Features: Edit profile, Change password, Delete account
@@ -208,10 +209,9 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'Unlock unlimited poems',
             gradient: AppColors.successGradient,
             onTap: () {
-              // Navigate to upgrade screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Upgrade screen coming soon!'),
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ProUpgradeScreen(),
                 ),
               );
             },
