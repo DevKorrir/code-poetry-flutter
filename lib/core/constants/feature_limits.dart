@@ -74,6 +74,16 @@ class FeatureLimits {
   static const int guestPoemsPerDay = 3;
 
   // ============================================================
+  // PRICING
+  // ============================================================
+  
+  /// Monthly subscription price in USD
+  static const double monthlyPrice = 4.99;
+  
+  /// Annual subscription price in USD
+  static const double annualPrice = 29.99;
+
+  // ============================================================
   // HELPER METHODS
   // ============================================================
   
@@ -106,4 +116,21 @@ class FeatureLimits {
     if (isGuest) return guestPoemsPerDay;
     return freePoemsPerDay;
   }
+  
+  /// Get formatted monthly price display
+  static String get monthlyPriceDisplay => '\$${monthlyPrice.toStringAsFixed(2)}/mo';
+  
+  /// Get formatted annual price display
+  static String get annualPriceDisplay => '\$${annualPrice.toStringAsFixed(2)}/yr';
+  
+  /// Calculate the savings percentage when choosing annual over monthly
+  static int get annualSavingsPercentage {
+    final monthlyYearlyCost = monthlyPrice * 12;
+    final savings = monthlyYearlyCost - annualPrice;
+    final percentage = (savings / monthlyYearlyCost * 100).round();
+    return percentage;
+  }
+  
+  /// Get formatted savings text for display
+  static String get annualSavingsText => 'SAVE ${annualSavingsPercentage}%';
 }

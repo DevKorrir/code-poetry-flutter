@@ -303,7 +303,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen>
                       ).copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '\$4.99/mo',
+                      FeatureLimits.monthlyPriceDisplay,
                       style: AppTextStyles.bodyMedium(
                         color: !_isAnnual
                             ? AppColors.primaryStart
@@ -344,7 +344,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen>
                           ).copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '\$29.99/yr',
+                          FeatureLimits.annualPriceDisplay,
                           style: AppTextStyles.bodyMedium(
                             color: _isAnnual
                                 ? AppColors.primaryStart
@@ -367,7 +367,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen>
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'SAVE 50%',
+                          FeatureLimits.annualSavingsText,
                           style: AppTextStyles.labelSmall(
                             color: Colors.black,
                           ).copyWith(fontSize: 9),
