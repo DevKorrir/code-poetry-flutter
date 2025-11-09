@@ -1,4 +1,3 @@
-import 'package:codepoetry/views/screens/home/home_screen.dart';
 import 'package:codepoetry/views/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

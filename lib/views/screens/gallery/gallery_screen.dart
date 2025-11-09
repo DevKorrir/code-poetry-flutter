@@ -7,7 +7,7 @@ import '../../../viewmodels/gallery_viewmodel.dart';
 import '../../../models/poem_model.dart';
 import '../../widgets/common/loading_indicator.dart';
 import '../../widgets/common/empty_state.dart';
-import '../poem_display/poem_display_screen.dart';
+import '../poem_display/saved_poem_detail_screen.dart';
 
 /// Gallery Screen - Fully Polished
 /// Features: Grid/List view, Filtering, Search, Sort
@@ -616,13 +616,9 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   void _openPoemDetail(PoemModel poem) {
-    // Navigate to poem detail or display screen
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(title: const Text('Poem')),
-          body: Center(child: Text(poem.poem)),
-        ),
+        builder: (context) => SavedPoemDetailScreen(poem: poem),
       ),
     );
   }
