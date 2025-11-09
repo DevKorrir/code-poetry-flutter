@@ -153,7 +153,7 @@ class _SavedPoemDetailScreenState extends State<SavedPoemDetailScreen>
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: _getStyleGradient(widget.poem.style),
+          gradient: PoetryStyleColors.getGradient(widget.poem.style),
         ),
         child: SafeArea(
           child: Column(
@@ -419,37 +419,6 @@ class _SavedPoemDetailScreenState extends State<SavedPoemDetailScreen>
         ),
       ),
     );
-  }
-
-  LinearGradient _getStyleGradient(String style) {
-    switch (style.toLowerCase()) {
-      case 'haiku':
-        return const LinearGradient(
-          colors: [Color(0xFF4FACFE), Color(0xFF38F9D7)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      case 'sonnet':
-        return const LinearGradient(
-          colors: [Color(0xFF764BA2), Color(0xFFFFD700)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      case 'free verse':
-        return const LinearGradient(
-          colors: [Color(0xFFF093FB), Color(0xFFF5576C)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      case 'cyberpunk':
-        return const LinearGradient(
-          colors: [Color(0xFF00F2FE), Color(0xFF43E97B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      default:
-        return AppColors.primaryGradient;
-    }
   }
 
   Color _getStyleColor(String style) {

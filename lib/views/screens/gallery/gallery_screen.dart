@@ -345,7 +345,7 @@ class _GalleryScreenState extends State<GalleryScreen>
       onLongPress: () => _showPoemOptions(poem),
       child: Container(
         decoration: BoxDecoration(
-          gradient: _getStyleGradient(poem.style),
+          gradient: PoetryStyleColors.getGradient(poem.style),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -465,7 +465,7 @@ class _GalleryScreenState extends State<GalleryScreen>
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  gradient: _getStyleGradient(poem.style),
+                  gradient: PoetryStyleColors.getGradient(poem.style),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -621,29 +621,6 @@ class _GalleryScreenState extends State<GalleryScreen>
         builder: (context) => SavedPoemDetailScreen(poem: poem),
       ),
     );
-  }
-
-  LinearGradient _getStyleGradient(String style) {
-    switch (style.toLowerCase()) {
-      case 'haiku':
-        return const LinearGradient(
-          colors: [Color(0xFF4FACFE), Color(0xFF38F9D7)],
-        );
-      case 'sonnet':
-        return const LinearGradient(
-          colors: [Color(0xFF764BA2), Color(0xFFFFD700)],
-        );
-      case 'free verse':
-        return const LinearGradient(
-          colors: [Color(0xFFF093FB), Color(0xFFF5576C)],
-        );
-      case 'cyberpunk':
-        return const LinearGradient(
-          colors: [Color(0xFF00F2FE), Color(0xFF43E97B)],
-        );
-      default:
-        return AppColors.primaryGradient;
-    }
   }
 
   String _getPoemPreview(String poem, int lines) {

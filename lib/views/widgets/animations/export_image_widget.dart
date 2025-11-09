@@ -44,7 +44,7 @@ class ExportImageWidget extends StatelessWidget {
         width: 400,
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          gradient: _getStyleGradient(poem.style),
+          gradient: PoetryStyleColors.getGradient(poem.style),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -97,28 +97,5 @@ class ExportImageWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  LinearGradient _getStyleGradient(String style) {
-    switch (style.toLowerCase()) {
-      case 'haiku':
-        return const LinearGradient(
-          colors: [Color(0xFF4FACFE), Color(0xFF38F9D7)],
-        );
-      case 'sonnet':
-        return const LinearGradient(
-          colors: [Color(0xFF764BA2), Color(0xFFFFD700)],
-        );
-      case 'free verse':
-        return const LinearGradient(
-          colors: [Color(0xFFF093FB), Color(0xFFF5576C)],
-        );
-      case 'cyberpunk':
-        return const LinearGradient(
-          colors: [Color(0xFF00F2FE), Color(0xFF43E97B)],
-        );
-      default:
-        return AppColors.primaryGradient;
-    }
   }
 }
