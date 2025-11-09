@@ -519,26 +519,57 @@ class ProfileScreen extends StatelessWidget {
               Navigator.pop(context);
 
               // Show final confirmation
+              final deleteController = TextEditingController();
               final confirmed = await showDialog<bool>(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Are you absolutely sure?'),
-                  content: const Text(
-                    'Type DELETE to confirm account deletion.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text(
-                        'Delete Forever',
-                        style: TextStyle(color: AppColors.error),
+                builder: (context) => StatefulBuilder(
+                  builder: (context, setState) {
+                    return AlertDialog(
+                      title: const Text('Are you absolutely sure?'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'This action cannot be undone. Type DELETE to confirm account deletion.',
+                          ),
+                          const SizedBox(height: 16),
+                          CustomTextField(
+                            label: 'Type DELETE',
+                            controller: deleteController,
+                            onChanged: (value) {
+                              setState(() {}); // Rebuild to update button state
+                            },
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            deleteController.dispose();
+                            Navigator.pop(context, false);
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: deleteController.text.trim() == 'DELETE'
+                              ? () {
+                                  deleteController.dispose();
+                                  Navigator.pop(context, true);
+                                }
+                              : null, // Disabled when text doesn't match
+                          child: Text(
+                            'Delete Forever',
+                            style: TextStyle(
+                              color: deleteController.text.trim() == 'DELETE'
+                                  ? AppColors.error
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               );
 
