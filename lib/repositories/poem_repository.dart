@@ -58,6 +58,9 @@ class PoemRepository {
       // Save to local storage
       await _storageService.savePoem(poem);
 
+      // Also save to cloud for logged-in users (fire and forget)
+      _syncPoemToCloud(poem);
+
       return poem;
     } on ApiException catch (e) {
       throw PoemException('Failed to generate poem: ${e.message}');
@@ -129,6 +132,9 @@ class PoemRepository {
   Future<void> updatePoem(PoemModel poem) async {
     try {
       await _storageService.savePoem(poem);
+      
+      // Also update in cloud for logged-in users (fire and forget)
+      _syncPoemToCloud(poem);
     } on StorageException catch (e) {
       throw PoemException('Failed to update poem: ${e.message}');
     }
@@ -138,6 +144,9 @@ class PoemRepository {
   Future<void> deletePoem(String poemId) async {
     try {
       await _storageService.deletePoem(poemId);
+      
+      // Also delete from cloud for logged-in users (fire and forget)
+      _syncPoemDeletionToCloud(poemId);
     } on StorageException catch (e) {
       throw PoemException('Failed to delete poem: ${e.message}');
     }
@@ -337,6 +346,39 @@ class PoemRepository {
     final validStyles = ['haiku', 'sonnet', 'free verse', 'cyberpunk'];
     if (!validStyles.contains(style.toLowerCase())) {
       throw PoemException('Invalid poetry style');
+    }
+  }
+
+  // ============================================================
+  // PRIVATE HELPERS
+  // ============================================================
+
+  /// Sync poem to cloud (fire and forget - don't block on failure)
+  void _syncPoemToCloud(PoemModel poem) async {
+    try {
+      // Get current user ID from storage
+      final userId = _storageService.getString(StorageKeys.userId);
+      final isGuest = _storageService.getBool(StorageKeys.isGuest) ?? true;
+      
+      if (userId != null && userId.isNotEmpty && !isGuest) {
+        await _storageService.savePoemToCloud(userId, poem);
+      }
+    } catch (e) {
+      // Fail silently - poem is already saved locally
+    }
+  }
+
+  /// Sync poem deletion to cloud (fire and forget)
+  void _syncPoemDeletionToCloud(String poemId) async {
+    try {
+      final userId = _storageService.getString(StorageKeys.userId);
+      final isGuest = _storageService.getBool(StorageKeys.isGuest) ?? true;
+      
+      if (userId != null && userId.isNotEmpty && !isGuest) {
+        await _storageService.deletePoemFromCloud(userId, poemId);
+      }
+    } catch (e) {
+      // Fail silently - poem is already deleted locally
     }
   }
 }
