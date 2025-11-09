@@ -522,51 +522,73 @@ class _GalleryScreenState extends State<GalleryScreen>
   }
 
   Widget _buildSortSheet() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Sort By',
-            style: AppTextStyles.h4(),
+    return Consumer<GalleryViewModel>(
+      builder: (context, viewModel, child) {
+        final currentSort = viewModel.sortOption;
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Sort By',
+                style: AppTextStyles.h4(),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.access_time),
+                title: const Text('Newest First'),
+                trailing: currentSort == SortOption.newestFirst
+                    ? const Icon(Icons.check, color: AppColors.primaryStart)
+                    : null,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  viewModel.setSortOption(SortOption.newestFirst);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.access_time),
+                title: const Text('Oldest First'),
+                trailing: currentSort == SortOption.oldestFirst
+                    ? const Icon(Icons.check, color: AppColors.primaryStart)
+                    : null,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  viewModel.setSortOption(SortOption.oldestFirst);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.favorite),
+                title: const Text('Favorites First'),
+                trailing: currentSort == SortOption.favoritesFirst
+                    ? const Icon(Icons.check, color: AppColors.primaryStart)
+                    : null,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  viewModel.setSortOption(SortOption.favoritesFirst);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.style),
+                title: const Text('By Style'),
+                trailing: currentSort == SortOption.byStyle
+                    ? const Icon(Icons.check, color: AppColors.primaryStart)
+                    : null,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  viewModel.setSortOption(SortOption.byStyle);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          ListTile(
-            leading: const Icon(Icons.access_time),
-            title: const Text('Newest First'),
-            onTap: () {
-              // Implement sort
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.access_time),
-            title: const Text('Oldest First'),
-            onTap: () {
-              // Implement sort
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.favorite),
-            title: const Text('Favorites First'),
-            onTap: () {
-              // Implement sort
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.style),
-            title: const Text('By Style'),
-            onTap: () {
-              // Implement sort
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
