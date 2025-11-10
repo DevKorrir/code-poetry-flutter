@@ -109,6 +109,23 @@ class AuthRepository {
     }
   }
 
+  /// Sign in with GitHub
+  Future<UserModel> signInWithGitHub() async {
+    try {
+      final user = await _authService.signInWithGitHub();
+
+      // Update Pro status
+      final isPro = _storageService.getBool(StorageKeys.isPro) ?? false;
+      final updatedUser = user.copyWith(isPro: isPro);
+
+      await _saveUserLocally(updatedUser);
+
+      return updatedUser;
+    } on AuthException catch (e) {
+      throw AuthRepositoryException(e.message);
+    }
+  }
+
   /// Sign in as guest
   Future<UserModel> signInAsGuest() async {
     try {

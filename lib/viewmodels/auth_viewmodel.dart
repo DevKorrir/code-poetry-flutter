@@ -153,6 +153,24 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  /// Sign in with GitHub
+  Future<bool> signInWithGitHub() async {
+    _setLoading(true);
+    _clearMessages();
+
+    try {
+      _currentUser = await _authRepository.signInWithGitHub();
+
+      _setSuccess('Connected with GitHub!');
+      _setLoading(false);
+      return true;
+    } on AuthRepositoryException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return false;
+    }
+  }
+
   /// Sign in as guest
   Future<bool> signInAsGuest() async {
     _setLoading(true);
