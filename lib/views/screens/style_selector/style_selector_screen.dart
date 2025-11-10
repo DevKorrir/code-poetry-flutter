@@ -262,56 +262,59 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
                 // Content
                 Padding(
                   padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Icon
-                      Text(
-                        style.icon,
-                        style: const TextStyle(fontSize: 80),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Style name
-                      Text(
-                        style.displayName,
-                        style: AppTextStyles.h2(color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Description
-                      Text(
-                        style.description,
-                        style: AppTextStyles.bodyLarge(
-                          color: Colors.white.withOpacity(0.9),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Icon
+                        Text(
+                          style.icon,
+                          style: const TextStyle(fontSize: 80),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
 
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 24),
 
-                      // Example poem
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                          ),
+                        // Style name
+                        Text(
+                          style.displayName,
+                          style: AppTextStyles.h2(color: Colors.white),
+                          textAlign: TextAlign.center,
                         ),
-                        child: Text(
-                          _getExamplePoem(style.name),
-                          style: AppTextStyles.poetryMedium(
-                            color: Colors.white,
+
+                        const SizedBox(height: 16),
+
+                        // Description
+                        Text(
+                          style.description,
+                          style: AppTextStyles.bodyLarge(
+                            color: Colors.white.withOpacity(0.9),
                           ),
                           textAlign: TextAlign.center,
                         ),
-                      ),
-                    ],
+
+                        const SizedBox(height: 32),
+
+                        // Example poem
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                            ),
+                          ),
+                          child: Text(
+                            _getExamplePoem(style.name),
+                            style: AppTextStyles.poetryMedium(
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
