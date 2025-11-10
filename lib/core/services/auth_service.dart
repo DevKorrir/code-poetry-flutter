@@ -171,7 +171,7 @@ class AuthService {
   /// Sign in with GitHub (Firebase OAuth)
   ///
   /// Web: Uses popup-based authentication (signInWithPopup)
-  /// Mobile: Uses OAuth with custom URL scheme via flutter_web_auth_2
+  /// Mobile: Uses Firebase's built-in web view flow (signInWithProvider)
   ///
   /// Returns: [UserModel] on success
   /// Throws: [AuthException] on failure
