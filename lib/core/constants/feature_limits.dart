@@ -84,6 +84,37 @@ class FeatureLimits {
   static const double annualPrice = 29.99;
 
   // ============================================================
+  // GITHUB API LIMITS
+  // ============================================================
+  
+  /// Maximum directory depth when recursively fetching files from GitHub
+  /// 
+  /// **Purpose:** Prevents excessive API calls and protects against:
+  /// - Deep directory structures causing performance issues
+  /// - Accidental infinite recursion
+  /// - GitHub API rate limiting (5000 requests/hour for authenticated users)
+  /// 
+  /// **Implications:**
+  /// - **Too Low (1-2):** Users might not see files in nested project structures
+  ///   Example: src/main/java/com/app won't be fully traversed at depth 2
+  /// 
+  /// - **Optimal (3-5):** Covers most real-world project structures
+  ///   Depth 3: Handles typical structures like src/components/common/Button.tsx
+  ///   Depth 5: Supports deeper structures like lib/features/auth/data/models/
+  /// 
+  /// - **Too High (6+):** Risk of performance degradation and API throttling
+  ///   Each directory level multiplies API calls exponentially
+  ///   Example: 10 subdirs per level = 10^depth API calls in worst case
+  /// 
+  /// **Default: 3** - Balances usability with performance
+  /// **Recommended Range: 2-5** - Adjust based on target repository structures
+  static const int githubMaxRecursionDepth = 3;
+  
+  /// Maximum number of repositories to fetch per page
+  /// GitHub API default is 30, max is 100
+  static const int githubReposPerPage = 30;
+
+  // ============================================================
   // HELPER METHODS
   // ============================================================
   
@@ -132,5 +163,5 @@ class FeatureLimits {
   }
   
   /// Get formatted savings text for display
-  static String get annualSavingsText => 'SAVE ${annualSavingsPercentage}%';
+  static String get annualSavingsText => 'SAVE $annualSavingsPercentage%';
 }

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 // Services
 import 'core/services/api_service.dart';
 import 'core/services/storage_service.dart';
+import 'core/services/secure_storage_service.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/connectivity_service.dart';
 
@@ -39,6 +40,9 @@ void main() async {
 
   final storageService = StorageService();
   await storageService.initialize();
+
+  final secureStorageService = SecureStorageService();
+  await secureStorageService.initialize();
 
   final connectivityService = ConnectivityService();
   await connectivityService.initialize();

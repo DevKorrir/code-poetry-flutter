@@ -7,6 +7,9 @@ import '../../../core/theme/text_styles.dart';
 import '../../../viewmodels/poem_generator_viewmodel.dart';
 import '../../widgets/common/custom_button.dart';
 import '../style_selector/style_selector_screen.dart';
+import '../../../core/services/github_service.dart';
+import '../github/github_connect_screen.dart';
+import '../github/github_repository_browser.dart';
 
 /// Code Input Screen
 /// User pastes code and selects language
@@ -106,6 +109,54 @@ class _CodeInputScreenState extends State<CodeInputScreen>
     HapticFeedback.lightImpact();
   }
 
+  /// Import code from GitHub repositories
+  /// 
+  /// Uses a callback-based approach for robust navigation that works
+  /// regardless of how deep the user navigates into repository folders.
+  Future<void> _importFromGitHub() async {
+    // Check if connected
+    if (!GitHubService().isAuthenticated) {
+      if (!mounted) return;
+      final connected = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const GitHubConnectScreen(),
+        ),
+      );
+      
+      if (connected != true) return;
+    }
+
+    // Browse repositories with callback for file selection
+    if (!mounted) return;
+    await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GitHubRepositoryBrowser(
+          onFileImported: (String code) {
+            // This callback is executed when a file is selected
+            // Handles data passing explicitly instead of relying on Navigator.pop
+            _codeController.text = code;
+            
+            HapticFeedback.mediumImpact();
+            
+            // Show success message after navigation completes
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Code imported from GitHub'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   void _continueToStyleSelector() {
     final viewModel = context.read<PoemGeneratorViewModel>();
 
@@ -165,6 +216,11 @@ class _CodeInputScreenState extends State<CodeInputScreen>
       appBar: AppBar(
         title: const Text(AppStrings.codeInputTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.code),
+            tooltip: 'Import from GitHub',
+            onPressed: _importFromGitHub,
+          ),
           if (_codeController.text.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear),

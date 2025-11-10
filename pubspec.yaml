@@ -47,6 +47,7 @@ dependencies:
   shared_preferences: ^2.2.2
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_secure_storage: ^9.0.0
 
     # Firebase
   firebase_core: ^4.2.1
@@ -69,6 +70,9 @@ dependencies:
 
   # google auth
   google_sign_in: ^7.2.0
+
+
+  webview_flutter: ^4.5.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

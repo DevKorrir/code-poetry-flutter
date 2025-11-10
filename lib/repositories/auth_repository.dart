@@ -109,6 +109,23 @@ class AuthRepository {
     }
   }
 
+  /// Sign in with GitHub
+  Future<UserModel> signInWithGitHub() async {
+    try {
+      final user = await _authService.signInWithGitHub();
+
+      // Update Pro status
+      final isPro = _storageService.getBool(StorageKeys.isPro) ?? false;
+      final updatedUser = user.copyWith(isPro: isPro);
+
+      await _saveUserLocally(updatedUser);
+
+      return updatedUser;
+    } on AuthException catch (e) {
+      throw AuthRepositoryException(e.message);
+    }
+  }
+
   /// Sign in as guest
   Future<UserModel> signInAsGuest() async {
     try {
@@ -329,6 +346,16 @@ class AuthRepository {
   /// Check if has password provider
   bool hasPasswordProvider() {
     return _authService.hasPasswordProvider();
+  }
+
+  /// Check if user has GitHub provider
+  bool hasGitHubProvider() {
+    return _authService.hasGitHubProvider();
+  }
+
+  /// Get GitHub token for API calls from secure storage
+  Future<String?> getGitHubToken() async {
+    return await _authService.getGitHubToken();
   }
 
   /// Check if has Google provider

@@ -54,6 +54,9 @@ class AuthViewModel extends ChangeNotifier {
   /// Check if user has password provider (can change password)
   bool hasPasswordProvider() => _authRepository.hasPasswordProvider();
 
+  /// Check if GitHub is connected
+  bool get hasGitHub => _authRepository.hasGitHubProvider();
+
   // ============================================================
   // INITIALIZATION
   // ============================================================
@@ -144,6 +147,24 @@ class AuthViewModel extends ChangeNotifier {
       _currentUser = await _authRepository.signInWithGoogle();
 
       _setSuccess('Signed in with Google!');
+      _setLoading(false);
+      return true;
+    } on AuthRepositoryException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Sign in with GitHub
+  Future<bool> signInWithGitHub() async {
+    _setLoading(true);
+    _clearMessages();
+
+    try {
+      _currentUser = await _authRepository.signInWithGitHub();
+
+      _setSuccess('Connected with GitHub!');
       _setLoading(false);
       return true;
     } on AuthRepositoryException catch (e) {

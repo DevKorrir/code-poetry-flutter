@@ -63,6 +63,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGitHub() async {
+    final authViewModel = context.read<AuthViewModel>();
+    final success = await authViewModel.signInWithGitHub();
+
+    if (success && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else if (mounted && authViewModel.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(authViewModel.error!)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
@@ -177,6 +192,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _signInWithGoogle,
                   isOutlined: true,
                   leadingIcon: const Icon(Icons.g_mobiledata, size: 28),
+                  isLoading: authViewModel.isLoading,
+                ),
+
+                const SizedBox(height: 16),
+
+                // GitHub sign in
+                CustomButton(
+                  text: AppStrings.loginWithGitHub,
+                  onPressed: _signInWithGitHub,
+                  isOutlined: true,
+                  leadingIcon: const Icon(Icons.code, size: 24),
                   isLoading: authViewModel.isLoading,
                 ),
 
