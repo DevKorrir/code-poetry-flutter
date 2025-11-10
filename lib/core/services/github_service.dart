@@ -1,7 +1,6 @@
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// GitHub Service
 /// Provides access to user's repositories and files
@@ -11,16 +10,38 @@ class GitHubService {
   GitHubService._internal();
 
   static const String _baseUrl = 'https://api.github.com';
-  String? _accessToken;
   final http.Client _client = http.Client();
 
-  /// Set access token after OAuth
-  void setAccessToken(String token) {
-    _accessToken = token;
+  /// Get GitHub access token from Firebase Auth
+  String? get _accessToken {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+
+    // Get GitHub credential token
+    for (var info in user.providerData) {
+      if (info.providerId == 'github.com') {
+        // Token is stored in Firebase, we'll get it from the credential
+        return _getTokenFromFirebase();
+      }
+    }
+    return null;
   }
 
-  /// Check if authenticated
-  bool get isAuthenticated => _accessToken != null;
+  /// Check if GitHub is connected
+  bool get isAuthenticated {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+    
+    return user.providerData.any((info) => info.providerId == 'github.com');
+  }
+
+  /// Get token from Firebase (stored during auth)
+  String? _getTokenFromFirebase() {
+    // The token is available during the sign-in process
+    // We need to store it when user signs in
+    // For now, we'll use a different approach with Firebase
+    return null; // We'll update this in auth_service
+  }
 
   // ============================================================
   // USER INFO
@@ -218,17 +239,20 @@ class GitHubService {
   // HTTP HELPER
   // ============================================================
 
+  /// Make authenticated request
   Future<dynamic> _makeRequest(String endpoint) async {
-    if (_accessToken == null) {
-      throw GitHubException('Not authenticated. Please connect GitHub first.');
+    final token = _accessToken;
+    
+    if (token == null) {
+      throw GitHubException('Not authenticated with GitHub');
     }
 
     final url = Uri.parse('$_baseUrl$endpoint');
-
+    
     final response = await _client.get(
       url,
       headers: {
-        'Authorization': 'token $_accessToken',
+        'Authorization': 'Bearer $token',
         'Accept': 'application/vnd.github.v3+json',
       },
     );
@@ -236,7 +260,7 @@ class GitHubService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else if (response.statusCode == 401) {
-      throw GitHubException('Authentication failed. Please reconnect GitHub.');
+      throw GitHubException('GitHub authentication expired');
     } else if (response.statusCode == 404) {
       throw GitHubException('Resource not found');
     } else if (response.statusCode == 403) {

@@ -7,6 +7,9 @@ import '../../../core/theme/text_styles.dart';
 import '../../../viewmodels/poem_generator_viewmodel.dart';
 import '../../widgets/common/custom_button.dart';
 import '../style_selector/style_selector_screen.dart';
+import '../../../core/services/github_service.dart';
+import '../github/github_connect_screen.dart';
+import '../github/github_repository_browser.dart';
 
 /// Code Input Screen
 /// User pastes code and selects language
@@ -106,6 +109,44 @@ class _CodeInputScreenState extends State<CodeInputScreen>
     HapticFeedback.lightImpact();
   }
 
+  Future<void> _importFromGitHub() async {
+    // Check if connected
+    if (!GitHubService().isAuthenticated) {
+      if (!mounted) return;
+      final connected = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const GitHubConnectScreen(),
+        ),
+      );
+      
+      if (connected != true) return;
+    }
+
+    // Browse repositories
+    if (!mounted) return;
+    final code = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GitHubRepositoryBrowser(),
+      ),
+    );
+
+    // Set code
+    if (code != null && code.isNotEmpty) {
+      _codeController.text = code;
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Code imported from GitHub'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   void _continueToStyleSelector() {
     final viewModel = context.read<PoemGeneratorViewModel>();
 
@@ -165,6 +206,11 @@ class _CodeInputScreenState extends State<CodeInputScreen>
       appBar: AppBar(
         title: const Text(AppStrings.codeInputTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.code),
+            tooltip: 'Import from GitHub',
+            onPressed: _importFromGitHub,
+          ),
           if (_codeController.text.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear),
