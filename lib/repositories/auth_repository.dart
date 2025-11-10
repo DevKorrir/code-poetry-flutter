@@ -353,9 +353,9 @@ class AuthRepository {
     return _authService.hasGitHubProvider();
   }
 
-  /// Get GitHub token for API calls
-  String? getGitHubToken() {
-    return _authService.getGitHubToken();
+  /// Get GitHub token for API calls from secure storage
+  Future<String?> getGitHubToken() async {
+    return await _authService.getGitHubToken();
   }
 
   /// Check if has Google provider

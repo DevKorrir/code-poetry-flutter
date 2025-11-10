@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../models/user_model.dart';
-import 'storage_service.dart';
+import 'secure_storage_service.dart';
 
 /// Authentication Service
 /// Handles all Firebase Authentication operations
@@ -18,8 +18,8 @@ class AuthService {
   // Modern, Corrected Initialization
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   
-  // Storage service for GitHub token
-  final StorageService _storageService = StorageService();
+  // Secure storage for sensitive credentials
+  final SecureStorageService _secureStorage = SecureStorageService();
 
 
   // Current user stream
@@ -192,9 +192,12 @@ class AuthService {
       final credential = userCredential.credential as OAuthCredential?;
       final accessToken = credential?.accessToken;
 
-      // Store token for GitHub API access
+      // Store token securely for GitHub API access
       if (accessToken != null) {
-        await _storageService.saveString('github_token', accessToken);
+        await _secureStorage.write(
+          key: SecureStorageKeys.githubToken,
+          value: accessToken,
+        );
       }
 
       return UserModel.fromFirebaseUser(user);
@@ -575,9 +578,9 @@ class AuthService {
         .any((info) => info.providerId == 'github.com');
   }
 
-  /// Get stored GitHub token
-  String? getGitHubToken() {
-    return _storageService.getString('github_token');
+  /// Get stored GitHub token from secure storage
+  Future<String?> getGitHubToken() async {
+    return await _secureStorage.read(key: SecureStorageKeys.githubToken);
   }
 
   /// Get provider name

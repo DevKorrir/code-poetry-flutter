@@ -12,14 +12,20 @@ class GitHubService {
   static const String _baseUrl = 'https://api.github.com';
   final http.Client _client = http.Client();
 
-  /// Get GitHub access token from AuthService
-  String? get _accessToken {
-    return AuthService().getGitHubToken();
+  /// Get GitHub access token from AuthService (async for secure storage)
+  Future<String?> _getAccessToken() async {
+    return await AuthService().getGitHubToken();
   }
 
-  /// Check if GitHub is connected
+  /// Check if GitHub is connected (sync check via Firebase provider)
   bool get isAuthenticated {
     return AuthService().hasGitHubProvider();
+  }
+
+  /// Check if token is available (async check)
+  Future<bool> isTokenAvailable() async {
+    final token = await _getAccessToken();
+    return token != null && token.isNotEmpty;
   }
 
   // ============================================================
@@ -220,9 +226,9 @@ class GitHubService {
 
   /// Make authenticated request
   Future<dynamic> _makeRequest(String endpoint) async {
-    final token = _accessToken;
+    final token = await _getAccessToken();
     
-    if (token == null) {
+    if (token == null || token.isEmpty) {
       throw GitHubException('Not authenticated with GitHub');
     }
 
