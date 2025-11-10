@@ -79,18 +79,65 @@ class _SignupScreenState extends State<SignupScreen> {
           MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       } else if (mounted && authViewModel.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authViewModel.error!)),
-        );
+        // Check if this is a redirect in progress (mobile only)
+        // Don't show error - app will redirect and come back
+        if (authViewModel.error == 'redirect_in_progress') {
+          // App will close and reopen after GitHub authorization
+          // Redirect result will be handled on app resume
+          return;
+        }
+        
+        // Check if it's a sessionStorage error - show dialog instead of snackbar
+        final error = authViewModel.error!;
+        if (error.contains('browser storage access') || 
+            error.contains('sessionStorage') ||
+            error.contains('missing initial state')) {
+          _showGitHubErrorDialog(error);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error)),
+          );
+        }
       }
     } catch (e) {
       // Handle any unexpected errors
+      // Don't show error if it's redirect_in_progress
+      if (mounted && e.toString().contains('redirect_in_progress')) {
+        // App will redirect, don't show error
+        return;
+      }
+      
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('GitHub sign in failed: ${e.toString()}')),
-        );
+        final errorMsg = e.toString();
+        if (errorMsg.contains('browser storage access') || 
+            errorMsg.contains('sessionStorage') ||
+            errorMsg.contains('missing initial state')) {
+          _showGitHubErrorDialog(errorMsg);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('GitHub sign in failed: $errorMsg')),
+          );
+        }
       }
     }
+  }
+
+  void _showGitHubErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('GitHub Sign-In Issue'),
+        content: SingleChildScrollView(
+          child: Text(message),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

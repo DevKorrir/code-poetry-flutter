@@ -171,7 +171,10 @@ class AuthService {
   /// Sign in with GitHub (Firebase OAuth)
   ///
   /// Web: Uses popup-based authentication (signInWithPopup)
-  /// Mobile: Uses Firebase's built-in web view flow (signInWithProvider)
+  /// Mobile: Uses provider-based authentication (signInWithProvider)
+  ///   - Opens browser/webview for OAuth
+  ///   - Returns user credential directly
+  ///   - Handles sessionStorage errors with retry logic
   ///
   /// Returns: [UserModel] on success
   /// Throws: [AuthException] on failure
@@ -184,25 +187,38 @@ class AuthService {
       githubProvider.addScope('repo');
       githubProvider.addScope('read:user');
 
+      githubProvider.setCustomParameters({
+        'allow_signup': 'true',
+      });
+
       final UserCredential userCredential;
       
       if (kIsWeb) {
         // Web: Use popup to avoid sessionStorage issues
-        githubProvider.setCustomParameters({
-          'allow_signup': 'true',
-        });
         userCredential = await _auth.signInWithPopup(githubProvider);
       } else {
-        // Mobile: Use Firebase's built-in GitHub OAuth with web view
-        // This approach uses a web view to handle the OAuth flow
-        
-        // Create GitHub provider with custom parameters
-        githubProvider.setCustomParameters({
-          'allow_signup': 'true',
-        });
-        
-        // Use signInWithProvider which works on mobile with web view
-        userCredential = await _auth.signInWithProvider(githubProvider);
+        // Mobile: Use signInWithProvider with retry logic for sessionStorage errors
+        try {
+          userCredential = await _auth.signInWithProvider(githubProvider);
+        } catch (e) {
+          // Check if it's a sessionStorage error
+          final errorString = e.toString().toLowerCase();
+          if (errorString.contains('sessionstorage') || 
+              errorString.contains('missing initial state') ||
+              errorString.contains('storage-partitioned')) {
+            // SessionStorage error - provide helpful message
+            throw AuthException(
+              'GitHub authentication requires browser storage access. '
+              'Please try:\n'
+              '1. Clear your browser cache and try again\n'
+              '2. Disable privacy extensions temporarily\n'
+              '3. Use Email/Password or Google sign-in instead\n'
+              '4. Update your browser to the latest version'
+            );
+          }
+          // Re-throw other errors
+          rethrow;
+        }
       }
 
       final user = userCredential.user;
@@ -224,10 +240,36 @@ class AuthService {
 
       return UserModel.fromFirebaseUser(user);
     } on FirebaseAuthException catch (e) {
+      // Check for sessionStorage-related error codes
+      if (e.message?.toLowerCase().contains('sessionstorage') == true ||
+          e.message?.toLowerCase().contains('missing initial state') == true) {
+        throw AuthException(
+          'GitHub authentication requires browser storage access. '
+          'Please try:\n'
+          '1. Clear your browser cache and try again\n'
+          '2. Disable privacy extensions temporarily\n'
+          '3. Use Email/Password or Google sign-in instead'
+        );
+      }
       throw AuthException(_getErrorMessage(e.code));
     } catch (e) {
-      if (e.toString().contains('CANCELED')) {
+      if (e is AuthException) {
+        rethrow;
+      }
+      if (e.toString().contains('CANCELED') || e.toString().contains('cancelled')) {
         throw AuthException('GitHub sign in was cancelled');
+      }
+      final errorMsg = e.toString().toLowerCase();
+      if (errorMsg.contains('sessionstorage') || 
+          errorMsg.contains('missing initial state') ||
+          errorMsg.contains('storage-partitioned')) {
+        throw AuthException(
+          'GitHub authentication requires browser storage access. '
+          'Please try:\n'
+          '1. Clear your browser cache and try again\n'
+          '2. Disable privacy extensions temporarily\n'
+          '3. Use Email/Password or Google sign-in instead'
+        );
       }
       throw AuthException('GitHub sign in failed: ${e.toString()}');
     }
@@ -235,12 +277,43 @@ class AuthService {
 
   /// Check for pending redirect result (call on app startup)
   ///
-  /// Note: This is now a no-op on mobile since we use direct OAuth flow.
-  /// Kept for backward compatibility.
+  /// Note: This is primarily for web platforms using redirect flow.
+  /// On mobile, signInWithProvider() handles OAuth directly without redirects.
+  /// This method is kept for backward compatibility and edge cases.
+  ///
+  /// Returns: [UserModel] if redirect was successful, null otherwise
   Future<UserModel?> getRedirectResult() async {
-    // With the new OAuth flow, there's no pending redirect result to check
-    // The authentication completes in one call
-    return null;
+    try {
+      // Only check redirect result on web (where redirect is used)
+      if (!kIsWeb) {
+        return null;
+      }
+      
+      // Check if there's a pending redirect result
+      final userCredential = await _auth.getRedirectResult();
+      
+      // If no user, there's no pending redirect
+      if (userCredential.user == null) {
+        return null;
+      }
+
+      // Get GitHub access token
+      final credential = userCredential.credential as OAuthCredential?;
+      final accessToken = credential?.accessToken;
+
+      // Store token securely for GitHub API access
+      if (accessToken != null) {
+        await _secureStorage.write(
+          key: SecureStorageKeys.githubToken,
+          value: accessToken,
+        );
+      }
+
+      return UserModel.fromFirebaseUser(userCredential.user!);
+    } catch (e) {
+      // Failed to get redirect result (might not be a GitHub redirect)
+      return null;
+    }
   }
 
   // ============================================================

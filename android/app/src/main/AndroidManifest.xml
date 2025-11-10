@@ -44,12 +44,24 @@
                     android:path="/__/auth/handler"/>
             </intent-filter>
             
-            <!-- Custom scheme for OAuth callback (alternative) -->
+            <!-- Custom scheme for OAuth callback (must match package name) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="com.example.codepoetry"/>
+            </intent-filter>
+            
+            <!-- Additional intent filter for Firebase Auth callback without autoVerify -->
+            <!-- This helps avoid sessionStorage issues by using direct deep links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data 
+                    android:scheme="https"
+                    android:host="codepoetry-80a07.firebaseapp.com"
+                    android:pathPrefix="/__/auth/handler"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
