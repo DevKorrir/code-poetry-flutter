@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/poem_model.dart';
 import '../core/services/api_service.dart';
 import '../core/services/storage_service.dart';
@@ -353,32 +355,45 @@ class PoemRepository {
   // PRIVATE HELPERS
   // ============================================================
 
-  /// Sync poem to cloud (fire and forget - don't block on failure)
-  void _syncPoemToCloud(PoemModel poem) async {
+  /// Check if cloud sync should occur for the current user
+  /// Returns the userId if sync should occur, null otherwise
+  String? _getUserIdForCloudSync() {
     try {
-      // Get current user ID from storage
       final userId = _storageService.getString(StorageKeys.userId);
       final isGuest = _storageService.getBool(StorageKeys.isGuest) ?? true;
       
       if (userId != null && userId.isNotEmpty && !isGuest) {
+        return userId;
+      }
+    } catch (e) {
+      debugPrint('Error checking cloud sync eligibility: $e');
+    }
+    return null;
+  }
+
+  /// Sync poem to cloud (fire and forget - don't block on failure)
+  void _syncPoemToCloud(PoemModel poem) async {
+    try {
+      final userId = _getUserIdForCloudSync();
+      if (userId != null) {
         await _storageService.savePoemToCloud(userId, poem);
       }
     } catch (e) {
       // Fail silently - poem is already saved locally
+      debugPrint('Cloud sync failed for poem ${poem.id}: $e');
     }
   }
 
   /// Sync poem deletion to cloud (fire and forget)
   void _syncPoemDeletionToCloud(String poemId) async {
     try {
-      final userId = _storageService.getString(StorageKeys.userId);
-      final isGuest = _storageService.getBool(StorageKeys.isGuest) ?? true;
-      
-      if (userId != null && userId.isNotEmpty && !isGuest) {
+      final userId = _getUserIdForCloudSync();
+      if (userId != null) {
         await _storageService.deletePoemFromCloud(userId, poemId);
       }
     } catch (e) {
       // Fail silently - poem is already deleted locally
+      debugPrint('Cloud deletion sync failed for poem $poemId: $e');
     }
   }
 }

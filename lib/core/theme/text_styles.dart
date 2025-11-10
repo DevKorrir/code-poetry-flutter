@@ -44,7 +44,7 @@ class AppTextStyles {
     fontSize: 24,
     fontWeight: FontWeight.w600,
     height: 1.3,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color ?? AppColors.darkTextTertiary,
   );
 
   /// H4 - Small headers
