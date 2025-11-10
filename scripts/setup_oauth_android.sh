@@ -21,7 +21,7 @@ if [ -f "android/app/google-services.json" ]; then
     
     if [ -f "$MANIFEST_PATH" ]; then
         # Replace placeholder with actual project ID
-        sed -i "s/codepoetry\.firebaseapp\.com/$PROJECT_ID.firebaseapp.com/g" "$MANIFEST_PATH"
+        sed -i.bak -E "s/[a-zA-Z0-9-]+\.firebaseapp\.com/$PROJECT_ID.firebaseapp.com/g" "$MANIFEST_PATH"
         
         echo "✅ Updated AndroidManifest.xml with Firebase host: $PROJECT_ID.firebaseapp.com"
         echo ""
