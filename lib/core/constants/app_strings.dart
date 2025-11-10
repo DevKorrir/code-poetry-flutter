@@ -42,6 +42,7 @@ class AppStrings {
   static const String loginNoAccount = 'Don\'t have an account?';
   static const String loginSignUp = 'Sign Up';
   static const String loginWithGoogle = 'Continue with Google';
+  static const String loginWithGitHub = 'Continue with GitHub';
   static const String loginAsGuest = 'Continue as Guest';
   static const String loginHaveAccount = 'Correct here';
   static const String loginSignIn = 'Correct here';
