@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../models/user_model.dart';
+import 'storage_service.dart';
 
 /// Authentication Service
 /// Handles all Firebase Authentication operations
@@ -16,6 +17,9 @@ class AuthService {
 
   // Modern, Corrected Initialization
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  
+  // Storage service for GitHub token
+  final StorageService _storageService = StorageService();
 
 
   // Current user stream
@@ -156,6 +160,48 @@ class AuthService {
       throw AuthException(_getErrorMessage(e.code));
     } catch (e) {
       throw AuthException('Google sign in failed: ${e.toString()}');
+    }
+  }
+
+  // ============================================================
+  // GITHUB SIGN-IN
+  // ============================================================
+
+  /// Sign in with GitHub (Firebase OAuth)
+  ///
+  /// Returns: [UserModel] on success
+  /// Throws: [AuthException] on failure
+  Future<UserModel> signInWithGitHub() async {
+    try {
+      // Create GitHub provider
+      final githubProvider = GithubAuthProvider();
+      
+      // Add scopes for repository access
+      githubProvider.addScope('repo');
+      githubProvider.addScope('read:user');
+
+      // Sign in with popup/redirect
+      final userCredential = await _auth.signInWithProvider(githubProvider);
+
+      final user = userCredential.user;
+      if (user == null) {
+        throw AuthException('GitHub sign in failed');
+      }
+
+      // Get GitHub access token
+      final credential = userCredential.credential as OAuthCredential?;
+      final accessToken = credential?.accessToken;
+
+      // Store token for GitHub API access
+      if (accessToken != null) {
+        await _storageService.saveString('github_token', accessToken);
+      }
+
+      return UserModel.fromFirebaseUser(user);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_getErrorMessage(e.code));
+    } catch (e) {
+      throw AuthException('GitHub sign in failed: ${e.toString()}');
     }
   }
 
@@ -522,6 +568,18 @@ class AuthService {
         .any((info) => info.providerId == 'google.com');
   }
 
+  /// Check if user has GitHub provider
+  bool hasGitHubProvider() {
+    if (currentUser == null) return false;
+    return currentUser!.providerData
+        .any((info) => info.providerId == 'github.com');
+  }
+
+  /// Get stored GitHub token
+  String? getGitHubToken() {
+    return _storageService.getString('github_token');
+  }
+
   /// Get provider name
   String getProviderName() {
     if (currentUser == null) return 'None';
@@ -536,6 +594,8 @@ class AuthService {
         return 'Email';
       case 'google.com':
         return 'Google';
+      case 'github.com':
+        return 'GitHub';
       default:
         return providerId;
     }

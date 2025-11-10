@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_service.dart';
 
 /// GitHub Service
 /// Provides access to user's repositories and files
@@ -12,35 +12,14 @@ class GitHubService {
   static const String _baseUrl = 'https://api.github.com';
   final http.Client _client = http.Client();
 
-  /// Get GitHub access token from Firebase Auth
+  /// Get GitHub access token from AuthService
   String? get _accessToken {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return null;
-
-    // Get GitHub credential token
-    for (var info in user.providerData) {
-      if (info.providerId == 'github.com') {
-        // Token is stored in Firebase, we'll get it from the credential
-        return _getTokenFromFirebase();
-      }
-    }
-    return null;
+    return AuthService().getGitHubToken();
   }
 
   /// Check if GitHub is connected
   bool get isAuthenticated {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return false;
-    
-    return user.providerData.any((info) => info.providerId == 'github.com');
-  }
-
-  /// Get token from Firebase (stored during auth)
-  String? _getTokenFromFirebase() {
-    // The token is available during the sign-in process
-    // We need to store it when user signs in
-    // For now, we'll use a different approach with Firebase
-    return null; // We'll update this in auth_service
+    return AuthService().hasGitHubProvider();
   }
 
   // ============================================================

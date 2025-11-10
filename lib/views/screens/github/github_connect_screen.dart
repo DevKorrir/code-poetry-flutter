@@ -1,8 +1,7 @@
-
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/text_styles.dart';
-import '../../../core/services/github_service.dart';
+import '../../../core/services/auth_service.dart';
 
 class GitHubConnectScreen extends StatefulWidget {
   const GitHubConnectScreen({super.key});
@@ -12,87 +11,36 @@ class GitHubConnectScreen extends StatefulWidget {
 }
 
 class _GitHubConnectScreenState extends State<GitHubConnectScreen> {
-  // GitHub OAuth App credentials
-  // Create at: https://github.com/settings/developers
-  final String clientId = 'your_github_client_id';
-  final String clientSecret = 'your_github_client_secret';
-  final String redirectUri = 'codepoetry://callback';
-
   bool _isLoading = false;
 
   Future<void> _connectGitHub() async {
-    // Simple token input for demo (replace with OAuth in production)
-    final token = await showDialog<String>(
-      context: context,
-      builder: (context) => _buildTokenDialog(),
-    );
+    setState(() => _isLoading = true);
 
-    if (token != null && token.isNotEmpty) {
-      setState(() => _isLoading = true);
+    try {
+      // Sign in with GitHub using Firebase Auth
+      final user = await AuthService().signInWithGitHub();
 
-      try {
-        GitHubService().setAccessToken(token);
-        final user = await GitHubService().getCurrentUser();
-
-        if (mounted) {
-          Navigator.pop(context, true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Connected as ${user.login}'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to connect: ${e.toString()}'),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        Navigator.pop(context, true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Connected as ${user.displayName ?? user.email}'),
+            backgroundColor: AppColors.success,
+          ),
+        );
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to connect: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  Widget _buildTokenDialog() {
-    final controller = TextEditingController();
-
-    return AlertDialog(
-      title: const Text('GitHub Personal Access Token'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Create a token at:\ngithub.com/settings/tokens',
-            style: TextStyle(fontSize: 12),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'ghp_xxxxxxxxxxxx',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 2,
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, controller.text),
-          child: const Text('Connect'),
-        ),
-      ],
-    );
   }
 
   @override
