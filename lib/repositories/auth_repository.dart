@@ -348,6 +348,16 @@ class AuthRepository {
     return _authService.hasPasswordProvider();
   }
 
+  /// Check if user has GitHub provider
+  bool hasGitHubProvider() {
+    return _authService.hasGitHubProvider();
+  }
+
+  /// Get GitHub token for API calls
+  String? getGitHubToken() {
+    return _authService.getGitHubToken();
+  }
+
   /// Check if has Google provider
   bool hasGoogleProvider() {
     return _authService.hasGoogleProvider();

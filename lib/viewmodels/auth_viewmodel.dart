@@ -54,6 +54,9 @@ class AuthViewModel extends ChangeNotifier {
   /// Check if user has password provider (can change password)
   bool hasPasswordProvider() => _authRepository.hasPasswordProvider();
 
+  /// Check if GitHub is connected
+  bool get hasGitHub => _authRepository.hasGitHubProvider();
+
   // ============================================================
   // INITIALIZATION
   // ============================================================
