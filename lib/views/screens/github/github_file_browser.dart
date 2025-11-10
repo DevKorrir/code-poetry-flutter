@@ -4,14 +4,19 @@ import '../../../core/theme/text_styles.dart';
 import '../../../core/services/github_service.dart';
 import '../../widgets/common/loading_indicator.dart';
 
+/// Callback type for when a file is successfully imported
+typedef OnFileImported = void Function(String code);
+
 class GitHubFileBrowser extends StatefulWidget {
   final GitHubRepository repository;
   final String? currentPath;
+  final OnFileImported? onFileImported;
 
   const GitHubFileBrowser({
     super.key,
     required this.repository,
     this.currentPath,
+    this.onFileImported,
   });
 
   @override
@@ -58,13 +63,14 @@ class _GitHubFileBrowserState extends State<GitHubFileBrowser> {
 
   Future<void> _onItemTap(GitHubContent content) async {
     if (content.isDirectory) {
-      // Navigate into folder
+      // Navigate into folder, passing the callback through
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => GitHubFileBrowser(
             repository: widget.repository,
             currentPath: content.path,
+            onFileImported: widget.onFileImported,
           ),
         ),
       );
@@ -83,8 +89,20 @@ class _GitHubFileBrowserState extends State<GitHubFileBrowser> {
     }
   }
 
+  /// Import a file and navigate back to the originating screen
+  /// 
+  /// Uses Navigator.popUntil to safely return to the screen that initiated
+  /// the GitHub browsing flow, avoiding brittle multiple Navigator.pop() calls.
+  /// 
+  /// The navigation stack is typically:
+  /// 1. CodeInputScreen (or other originating screen)
+  /// 2. GitHubRepositoryBrowser
+  /// 3. GitHubFileBrowser (current screen)
+  /// 4. Loading dialog
+  /// 
+  /// This method pops back to the originating screen (#1) with the file content.
   Future<void> _importFile(GitHubContent file) async {
-    // Show loading
+    // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -100,21 +118,45 @@ class _GitHubFileBrowserState extends State<GitHubFileBrowser> {
         path: file.path,
       );
 
-      if (mounted) {
-        Navigator.pop(context); // Close loading
-        Navigator.pop(context, code); // Return code
-        Navigator.pop(context); // Close file browser
+      if (!mounted) return;
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Use callback if provided (callback-based approach)
+      if (widget.onFileImported != null) {
+        // Callback will handle navigation and data passing
+        widget.onFileImported!(code);
+        
+        // Pop all GitHub screens back to originating screen
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else {
+        // Fallback: Use popUntil to return to originating screen
+        // Pop until we're back at the first route (originating screen)
+        Navigator.popUntil(context, (route) {
+          // Check if this is the second-to-last route
+          // (we want to keep the originating screen)
+          return route.isFirst || 
+                 (route.settings.arguments == null && 
+                  route.settings.name == null);
+        });
+        
+        // Return the code to the originating screen
+        Navigator.pop(context, code);
       }
     } catch (e) {
-      if (mounted) {
-        Navigator.pop(context); // Close loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load file: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load file: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 

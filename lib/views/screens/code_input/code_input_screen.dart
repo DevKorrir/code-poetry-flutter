@@ -109,6 +109,10 @@ class _CodeInputScreenState extends State<CodeInputScreen>
     HapticFeedback.lightImpact();
   }
 
+  /// Import code from GitHub repositories
+  /// 
+  /// Uses a callback-based approach for robust navigation that works
+  /// regardless of how deep the user navigates into repository folders.
   Future<void> _importFromGitHub() async {
     // Check if connected
     if (!GitHubService().isAuthenticated) {
@@ -123,28 +127,34 @@ class _CodeInputScreenState extends State<CodeInputScreen>
       if (connected != true) return;
     }
 
-    // Browse repositories
+    // Browse repositories with callback for file selection
     if (!mounted) return;
-    final code = await Navigator.push<String>(
+    await Navigator.push<String>(
       context,
       MaterialPageRoute(
-        builder: (context) => const GitHubRepositoryBrowser(),
+        builder: (context) => GitHubRepositoryBrowser(
+          onFileImported: (String code) {
+            // This callback is executed when a file is selected
+            // Handles data passing explicitly instead of relying on Navigator.pop
+            _codeController.text = code;
+            
+            HapticFeedback.mediumImpact();
+            
+            // Show success message after navigation completes
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Code imported from GitHub'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            });
+          },
+        ),
       ),
     );
-
-    // Set code
-    if (code != null && code.isNotEmpty) {
-      _codeController.text = code;
-      if (mounted) {
-        HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Code imported from GitHub'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
   }
 
   void _continueToStyleSelector() {

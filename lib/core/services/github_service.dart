@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
+import '../constants/feature_limits.dart';
 
 /// GitHub Service
 /// Provides access to user's repositories and files
@@ -185,11 +186,28 @@ class GitHubService {
   }
 
   /// Get files recursively (with depth limit)
+  /// 
+  /// Traverses a repository directory structure up to [maxDepth] levels.
+  /// 
+  /// **Parameters:**
+  /// - [owner]: Repository owner username
+  /// - [repo]: Repository name
+  /// - [path]: Starting path (empty string = root)
+  /// - [maxDepth]: Maximum recursion depth (default from FeatureLimits)
+  /// - [currentDepth]: Internal counter for recursion (DO NOT SET)
+  /// 
+  /// **Performance Note:**
+  /// Each directory level makes 1 API call. A repo with 10 subdirectories
+  /// per level could make up to 10^depth calls in worst case.
+  /// Default depth of 3 provides good balance for typical projects.
+  /// 
+  /// **To adjust depth:** Modify `FeatureLimits.githubMaxRecursionDepth`
+  /// or pass custom [maxDepth] value for specific use cases.
   Future<List<GitHubContent>> getFilesRecursively({
     required String owner,
     required String repo,
     String path = '',
-    int maxDepth = 3,
+    int maxDepth = FeatureLimits.githubMaxRecursionDepth,
     int currentDepth = 0,
   }) async {
     if (currentDepth >= maxDepth) return [];

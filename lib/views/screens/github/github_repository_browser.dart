@@ -8,7 +8,12 @@ import '../../widgets/common/empty_state.dart';
 import 'github_file_browser.dart';
 
 class GitHubRepositoryBrowser extends StatefulWidget {
-  const GitHubRepositoryBrowser({super.key});
+  final OnFileImported? onFileImported;
+
+  const GitHubRepositoryBrowser({
+    super.key,
+    this.onFileImported,
+  });
 
   @override
   State<GitHubRepositoryBrowser> createState() =>
@@ -129,7 +134,10 @@ class _GitHubRepositoryBrowserState extends State<GitHubRepositoryBrowser> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => GitHubFileBrowser(repository: repo),
+            builder: (context) => GitHubFileBrowser(
+              repository: repo,
+              onFileImported: widget.onFileImported,
+            ),
           ),
         );
       },
