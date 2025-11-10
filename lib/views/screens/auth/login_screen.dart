@@ -65,16 +65,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _signInWithGitHub() async {
     final authViewModel = context.read<AuthViewModel>();
-    final success = await authViewModel.signInWithGitHub();
+    
+    try {
+      final success = await authViewModel.signInWithGitHub();
 
-    if (success && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    } else if (mounted && authViewModel.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authViewModel.error!)),
-      );
+      if (success && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else if (mounted && authViewModel.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.error!)),
+        );
+      }
+    } catch (e) {
+      // Handle any unexpected errors
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('GitHub sign in failed: ${e.toString()}')),
+        );
+      }
     }
   }
 

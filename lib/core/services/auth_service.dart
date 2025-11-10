@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../models/user_model.dart';
 import 'secure_storage_service.dart';
@@ -169,6 +170,9 @@ class AuthService {
 
   /// Sign in with GitHub (Firebase OAuth)
   ///
+  /// Web: Uses popup-based authentication (signInWithPopup)
+  /// Mobile: Uses OAuth with custom URL scheme via flutter_web_auth_2
+  ///
   /// Returns: [UserModel] on success
   /// Throws: [AuthException] on failure
   Future<UserModel> signInWithGitHub() async {
@@ -180,8 +184,26 @@ class AuthService {
       githubProvider.addScope('repo');
       githubProvider.addScope('read:user');
 
-      // Sign in with popup/redirect
-      final userCredential = await _auth.signInWithProvider(githubProvider);
+      final UserCredential userCredential;
+      
+      if (kIsWeb) {
+        // Web: Use popup to avoid sessionStorage issues
+        githubProvider.setCustomParameters({
+          'allow_signup': 'true',
+        });
+        userCredential = await _auth.signInWithPopup(githubProvider);
+      } else {
+        // Mobile: Use Firebase's built-in GitHub OAuth with web view
+        // This approach uses a web view to handle the OAuth flow
+        
+        // Create GitHub provider with custom parameters
+        githubProvider.setCustomParameters({
+          'allow_signup': 'true',
+        });
+        
+        // Use signInWithProvider which works on mobile with web view
+        userCredential = await _auth.signInWithProvider(githubProvider);
+      }
 
       final user = userCredential.user;
       if (user == null) {
@@ -204,8 +226,21 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       throw AuthException(_getErrorMessage(e.code));
     } catch (e) {
+      if (e.toString().contains('CANCELED')) {
+        throw AuthException('GitHub sign in was cancelled');
+      }
       throw AuthException('GitHub sign in failed: ${e.toString()}');
     }
+  }
+
+  /// Check for pending redirect result (call on app startup)
+  ///
+  /// Note: This is now a no-op on mobile since we use direct OAuth flow.
+  /// Kept for backward compatibility.
+  Future<UserModel?> getRedirectResult() async {
+    // With the new OAuth flow, there's no pending redirect result to check
+    // The authentication completes in one call
+    return null;
   }
 
   // ============================================================

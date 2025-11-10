@@ -110,6 +110,9 @@ class AuthRepository {
   }
 
   /// Sign in with GitHub
+  /// 
+  /// Opens a browser for GitHub OAuth authorization.
+  /// Returns the signed-in user on success.
   Future<UserModel> signInWithGitHub() async {
     try {
       final user = await _authService.signInWithGitHub();
@@ -123,6 +126,31 @@ class AuthRepository {
       return updatedUser;
     } on AuthException catch (e) {
       throw AuthRepositoryException(e.message);
+    }
+  }
+
+  /// Check for pending GitHub OAuth redirect result (mobile only)
+  /// 
+  /// Call this on app startup to handle returning from GitHub authorization.
+  /// Returns the signed-in user or null if no pending result.
+  Future<UserModel?> checkPendingRedirectResult() async {
+    try {
+      final user = await _authService.getRedirectResult();
+      
+      if (user == null) {
+        return null; // No pending redirect
+      }
+
+      // Update Pro status
+      final isPro = _storageService.getBool(StorageKeys.isPro) ?? false;
+      final updatedUser = user.copyWith(isPro: isPro);
+
+      await _saveUserLocally(updatedUser);
+
+      return updatedUser;
+    } catch (e) {
+      // Failed to get redirect result
+      return null;
     }
   }
 
