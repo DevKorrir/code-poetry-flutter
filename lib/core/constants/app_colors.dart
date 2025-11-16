@@ -11,43 +11,43 @@ class AppColors {
   // ============================================================
 
   /// Deep navy background - primary app background
-  static const Color darkBackground = Color(0xFF0A0E27);
+  static const Color darkBackground = Color(0xFF0D1117);
 
   /// Lighter navy surface - cards, containers
-  static const Color darkSurface = Color(0xFF1A1F3A);
+  static const Color darkSurface = Color(0xFF161B22);
 
   /// Even lighter surface for elevated elements
-  static const Color darkSurfaceLight = Color(0xFF2A2F4A);
+  static const Color darkSurfaceLight = Color(0xFF21262D);
 
   /// Subtle surface for hover/pressed states
-  static const Color darkSurfaceHover = Color(0xFF353A5A);
+  static const Color darkSurfaceHover = Color(0xFF30363D);
 
   // Text Colors (Dark Theme)
-  static const Color darkTextPrimary = Color(0xFFFFFFFF);
-  static const Color darkTextSecondary = Color(0xFFB8B8D1);
-  static const Color darkTextTertiary = Color(0xFF6B6B8C);
-  static const Color darkTextDisabled = Color(0xFF4A4A5C);
+  static const Color darkTextPrimary = Color(0xFFF0F6FC);
+  static const Color darkTextSecondary = Color(0xFFC9D1D9);
+  static const Color darkTextTertiary = Color(0xFF8B949E);
+  static const Color darkTextDisabled = Color(0xFF484F58);
 
   // ============================================================
   // LIGHT THEME COLORS
   // ============================================================
 
   /// Light background
-  static const Color lightBackground = Color(0xFFF5F7FA);
+  static const Color lightBackground = Color(0xFFFFFFFF);
 
   /// Light surface - cards, containers
-  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightSurface = Color(0xFFF6F8FA);
 
   /// Slightly darker surface for depth
-  static const Color lightSurfaceDark = Color(0xFFF0F2F5);
+  static const Color lightSurfaceDark = Color(0xFFEAECEF);
 
   /// Hover state
-  static const Color lightSurfaceHover = Color(0xFFE8EAED);
+  static const Color lightSurfaceHover = Color(0xFFD0D7DE);
 
   // Text Colors (Light Theme)
-  static const Color lightTextPrimary = Color(0xFF1A1F3A);
-  static const Color lightTextSecondary = Color(0xFF4A5568);
-  static const Color lightTextTertiary = Color(0xFF718096);
+  static const Color lightTextPrimary = Color(0xFF1F2328);
+  static const Color lightTextSecondary = Color(0xFF656D76);
+  static const Color lightTextTertiary = Color(0xFF8B949E);
   static const Color lightTextDisabled = Color(0xFFA0AEC0);
 
   // ============================================================
@@ -55,72 +55,72 @@ class AppColors {
   // ============================================================
 
   /// Primary gradient - Purple-Blue
-  static const Color primaryStart = Color(0xFF667EEA);
-  static const Color primaryEnd = Color(0xFF764BA2);
+  static const Color primaryStart = Color(0xFF6E40C9);
+  static const Color primaryEnd = Color(0xFF2D7FF9);
 
   /// Secondary gradient - Cyan
-  static const Color secondaryStart = Color(0xFF4FACFE);
-  static const Color secondaryEnd = Color(0xFF00F2FE);
+  static const Color secondaryStart = Color(0xFF2D7FF9);
+  static const Color secondaryEnd = Color(0xFF79C0FF);
 
   /// Accent gradient - Pink-Orange (for special elements)
-  static const Color accentStart = Color(0xFFF093FB);
-  static const Color accentEnd = Color(0xFFF5576C);
+  static const Color accentStart = Color(0xFFF778BA);
+  static const Color accentEnd = Color(0xFFFFA7D4);
 
   /// Success gradient - Green
-  static const Color successStart = Color(0xFF43E97B);
-  static const Color successEnd = Color(0xFF38F9D7);
+  static const Color successStart = Color(0xFF3FB950);
+  static const Color successEnd = Color(0xFF56D364);
 
   // ============================================================
   // SEMANTIC COLORS
   // ============================================================
 
   /// Success state
-  static const Color success = Color(0xFF43E97B);
-  static const Color successLight = Color(0xFF6FFFA1);
-  static const Color successDark = Color(0xFF2EC55F);
+  static const Color success = Color(0xFF3FB950);
+  static const Color successLight = Color(0xFF56D364);
+  static const Color successDark = Color(0xFF2EA043);
 
   /// Error state
-  static const Color error = Color(0xFFFF6A88);
-  static const Color errorLight = Color(0xFFFF8FA5);
-  static const Color errorDark = Color(0xFFE5546E);
+  static const Color error = Color(0xFFF85149);
+  static const Color errorLight = Color(0xFFFA6B65);
+  static const Color errorDark = Color(0xFFDA3633);
 
   /// Warning state
-  static const Color warning = Color(0xFFFEE140);
-  static const Color warningLight = Color(0xFFFFED70);
-  static const Color warningDark = Color(0xFFE5CA2E);
+  static const Color warning = Color(0xFFE3B341);
+  static const Color warningLight = Color(0xFFE9C366);
+  static const Color warningDark = Color(0xFFD29922);
 
   /// Info state
-  static const Color info = Color(0xFF4FACFE);
-  static const Color infoLight = Color(0xFF7DC4FF);
-  static const Color infoDark = Color(0xFF3594E5);
+  static const Color info = Color(0xFF2D7FF9);
+  static const Color infoLight = Color(0xFF5B9CFB);
+  static const Color infoDark = Color(0xFF1A5FC1);
 
   // ============================================================
   // SPECIAL PURPOSE COLORS
   // ============================================================
 
   /// Code background (VS Code dark theme inspired)
-  static const Color codeBackground = Color(0xFF1E1E1E);
-  static const Color codeBackgroundLight = Color(0xFFF8F9FA);
+  static const Color codeBackground = Color(0xFF161B22);
+  static const Color codeBackgroundLight = Color(0xFFF6F8FA);
 
   /// Poetry glow effect
-  static const Color poetryGlow = Color(0xFF9D50BB);
+  static const Color poetryGlow = Color(0xFF6E40C9);
 
   /// Premium/Pro badge color
-  static const Color premium = Color(0xFFFFD700); // Gold
+  static const Color premium = Color(0xFFE3B341); // Gold
 
   /// Guest mode indicator
-  static const Color guest = Color(0xFF718096);
+  static const Color guest = Color(0xFF8B949E);
 
   // ============================================================
   // SYNTAX HIGHLIGHTING COLORS (for code editor)
   // ============================================================
 
-  static const Color syntaxKeyword = Color(0xFFC586C0);
-  static const Color syntaxString = Color(0xFFCE9178);
-  static const Color syntaxComment = Color(0xFF6A9955);
-  static const Color syntaxFunction = Color(0xFFDCDCAA);
-  static const Color syntaxVariable = Color(0xFF9CDCFE);
-  static const Color syntaxNumber = Color(0xFFB5CEA8);
+  static const Color syntaxKeyword = Color(0xFFFF7B72);
+  static const Color syntaxString = Color(0xFFA5D6FF);
+  static const Color syntaxComment = Color(0xFF8B949E);
+  static const Color syntaxFunction = Color(0xFFD2A8FF);
+  static const Color syntaxVariable = Color(0xFF79C0FF);
+  static const Color syntaxNumber = Color(0xFF56D364);
 
   // ============================================================
   // OPACITY VARIANTS (for overlays, shadows)
@@ -167,9 +167,9 @@ class AppColors {
   /// Background gradient (animated)
   static const LinearGradient backgroundGradient = LinearGradient(
     colors: [
-      Color(0xFF0A0E27),
-      Color(0xFF1A1F3A),
-      Color(0xFF2A2F4A),
+      Color(0xFF0D1117),
+      Color(0xFF161B22),
+      Color(0xFF21262D),
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -179,9 +179,9 @@ class AppColors {
   // SHADOW COLORS
   // ============================================================
 
-  static final Color shadowDark = Colors.black.withOpacity(0.3);
+  static final Color shadowDark = Colors.black.withOpacity(0.4);
   static final Color shadowLight = Colors.black.withOpacity(0.1);
-  static final Color glowShadow = poetryGlow.withOpacity(0.4);
+  static final Color glowShadow = poetryGlow.withOpacity(0.3);
 
   // ============================================================
   // HELPER METHODS
@@ -223,36 +223,36 @@ class AppColors {
 class PoetryStyleColors {
   PoetryStyleColors._();
 
-  // Haiku - Calm, minimalist (Blue-Green)
-  static const Color haikuPrimary = Color(0xFF4FACFE);
-  static const Color haikuSecondary = Color(0xFF38F9D7);
+  // Haiku - Calm, minimalist (Blue)
+  static const Color haikuPrimary = Color(0xFF2D7FF9);
+  static const Color haikuSecondary = Color(0xFF79C0FF);
   static const LinearGradient haikuGradient = LinearGradient(
     colors: [haikuPrimary, haikuSecondary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Sonnet - Classical, elegant (Purple-Gold)
-  static const Color sonnetPrimary = Color(0xFF764BA2);
-  static const Color sonnetSecondary = Color(0xFFFFD700);
+  // Sonnet - Classical, elegant (Purple)
+  static const Color sonnetPrimary = Color(0xFF6E40C9);
+  static const Color sonnetSecondary = Color(0xFFD2A8FF);
   static const LinearGradient sonnetGradient = LinearGradient(
     colors: [sonnetPrimary, sonnetSecondary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Free Verse - Creative, flowing (Pink-Orange)
-  static const Color freeVersePrimary = Color(0xFFF093FB);
-  static const Color freeVerseSecondary = Color(0xFFF5576C);
+  // Free Verse - Creative, flowing (Pink)
+  static const Color freeVersePrimary = Color(0xFFF778BA);
+  static const Color freeVerseSecondary = Color(0xFFFFA7D4);
   static const LinearGradient freeVerseGradient = LinearGradient(
     colors: [freeVersePrimary, freeVerseSecondary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Cyberpunk - Edgy, futuristic (Neon Green-Blue)
-  static const Color cyberpunkPrimary = Color(0xFF00F2FE);
-  static const Color cyberpunkSecondary = Color(0xFF43E97B);
+  // Cyberpunk - Edgy, futuristic (Green)
+  static const Color cyberpunkPrimary = Color(0xFF56D364);
+  static const Color cyberpunkSecondary = Color(0xFF3FB950);
   static const LinearGradient cyberpunkGradient = LinearGradient(
     colors: [cyberpunkPrimary, cyberpunkSecondary],
     begin: Alignment.topLeft,
