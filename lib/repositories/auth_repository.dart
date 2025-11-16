@@ -1,3 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../models/user_model.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/storage_service.dart';
@@ -109,10 +112,7 @@ class AuthRepository {
     }
   }
 
-  /// Sign in with GitHub
-  /// 
-  /// Opens a browser for GitHub OAuth authorization.
-  /// Returns the signed-in user on success.
+  /// Sign in with GitHub - USE AUTH SERVICE IMPLEMENTATION
   Future<UserModel> signInWithGitHub() async {
     try {
       final user = await _authService.signInWithGitHub();
@@ -129,14 +129,11 @@ class AuthRepository {
     }
   }
 
-  /// Check for pending GitHub OAuth redirect result (mobile only)
-  /// 
-  /// Call this on app startup to handle returning from GitHub authorization.
-  /// Returns the signed-in user or null if no pending result.
+  /// Check for pending GitHub OAuth redirect result
   Future<UserModel?> checkPendingRedirectResult() async {
     try {
       final user = await _authService.getRedirectResult();
-      
+
       if (user == null) {
         return null; // No pending redirect
       }
@@ -165,6 +162,35 @@ class AuthRepository {
     } on AuthException catch (e) {
       throw AuthRepositoryException(e.message);
     }
+  }
+
+  // ============================================================
+  // PROVIDER INFO
+  // ============================================================
+
+  /// Check if user has GitHub provider
+  bool hasGitHubProvider() {
+    return _authService.hasGitHubProvider();
+  }
+
+  /// Get authentication provider name
+  String getProviderName() {
+    return _authService.getProviderName();
+  }
+
+  /// Check if has password provider
+  bool hasPasswordProvider() {
+    return _authService.hasPasswordProvider();
+  }
+
+  /// Check if has Google provider
+  bool hasGoogleProvider() {
+    return _authService.hasGoogleProvider();
+  }
+
+  /// Get GitHub token for API calls from secure storage
+  Future<String?> getGitHubToken() async {
+    return await _authService.getGitHubToken();
   }
 
   // ============================================================
@@ -360,35 +386,6 @@ class AuthRepository {
   /// Get locally saved user ID
   String? getLocalUserId() {
     return _storageService.getString(StorageKeys.userId);
-  }
-
-  // ============================================================
-  // PROVIDER INFO
-  // ============================================================
-
-  /// Get authentication provider name
-  String getProviderName() {
-    return _authService.getProviderName();
-  }
-
-  /// Check if has password provider
-  bool hasPasswordProvider() {
-    return _authService.hasPasswordProvider();
-  }
-
-  /// Check if user has GitHub provider
-  bool hasGitHubProvider() {
-    return _authService.hasGitHubProvider();
-  }
-
-  /// Get GitHub token for API calls from secure storage
-  Future<String?> getGitHubToken() async {
-    return await _authService.getGitHubToken();
-  }
-
-  /// Check if has Google provider
-  bool hasGoogleProvider() {
-    return _authService.hasGoogleProvider();
   }
 
   // ============================================================

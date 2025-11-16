@@ -29,27 +29,28 @@
             </intent-filter>
             
             <!-- Deep link for Firebase OAuth callback -->
+            <!-- Values are injected from build.gradle.kts manifestPlaceholders -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- Firebase Auth Dynamic Links -->
+                <!-- Firebase Auth Dynamic Links (optional, only if Dynamic Links are configured) -->
                 <data
                     android:scheme="https"
-                    android:host="codepoetry.page.link"/>
+                    android:host="${firebaseDynamicLinkHost}"/>
                 <!-- Firebase Auth callback -->
                 <data
                     android:scheme="https"
-                    android:host="codepoetry-80a07.firebaseapp.com"
+                    android:host="${firebaseAuthHost}"
                     android:path="/__/auth/handler"/>
             </intent-filter>
             
-            <!-- Custom scheme for OAuth callback (must match package name) -->
+            <!-- Custom scheme for OAuth callback (uses applicationId from build.gradle.kts) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="com.example.codepoetry"/>
+                <data android:scheme="${appAuthScheme}"/>
             </intent-filter>
             
             <!-- Additional intent filter for Firebase Auth callback without autoVerify -->
@@ -60,7 +61,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data 
                     android:scheme="https"
-                    android:host="codepoetry-80a07.firebaseapp.com"
+                    android:host="${firebaseAuthHost}"
                     android:pathPrefix="/__/auth/handler"/>
             </intent-filter>
         </activity>
