@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../models/user_model.dart';
 import 'secure_storage_service.dart';
 
@@ -33,6 +34,12 @@ class AuthService {
 
   // Check if user is guest
   bool get isGuest => currentUser?.isAnonymous ?? true;
+
+  // GitHub OAuth configuration from environment
+  String get _githubClientId => dotenv.get('GITHUB_CLIENT_ID');
+  String get _githubClientSecret => dotenv.get('GITHUB_CLIENT_SECRET'); // ADD THIS
+  String get _githubRedirectUrl => dotenv.get('GITHUB_REDIRECT_URL');
+
 
   // ============================================================
   // GITHUB TOKEN MANAGEMENT
@@ -182,6 +189,9 @@ class AuthService {
 
       // Set custom parameters to help with sessionStorage issues
       githubProvider.setCustomParameters({
+        'client_id': _githubClientId,
+        'client_secret': _githubClientSecret,
+        'redirect_uri': _githubRedirectUrl,
         'allow_signup': 'true',
         'prompt': 'consent', // Force consent screen to help with state issues
       });
