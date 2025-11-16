@@ -1,11 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import '../../models/user_model.dart';
 import 'secure_storage_service.dart';
 
 /// Authentication Service
 /// Handles all Firebase Authentication operations
-/// Supports: Email/Password, Google Sign-In, Guest Mode
+/// Supports: Email/Password, Google Sign-In, GitHub, Guest Mode
 class AuthService {
   // Singleton pattern
   static final AuthService _instance = AuthService._internal();
@@ -17,10 +20,9 @@ class AuthService {
 
   // Modern, Corrected Initialization
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  
+
   // Secure storage for sensitive credentials
   final SecureStorageService _secureStorage = SecureStorageService();
-
 
   // Current user stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -34,19 +36,39 @@ class AuthService {
   // Check if user is guest
   bool get isGuest => currentUser?.isAnonymous ?? true;
 
+  // GitHub OAuth configuration from environment
+  String get _githubClientId => dotenv.get('GITHUB_CLIENT_ID');
+  String get _githubClientSecret => dotenv.get('GITHUB_CLIENT_SECRET'); // ADD THIS
+  String get _githubRedirectUrl => dotenv.get('GITHUB_REDIRECT_URL');
+
+
+  // ============================================================
+  // GITHUB TOKEN MANAGEMENT
+  // ============================================================
+
+  /// Store GitHub token securely
+  Future<void> storeGitHubToken(String token) async {
+    await _secureStorage.write(
+      key: SecureStorageKeys.githubToken,
+      value: token,
+    );
+  }
+
+  /// Get stored GitHub token
+  Future<String?> getGitHubToken() async {
+    return await _secureStorage.read(key: SecureStorageKeys.githubToken);
+  }
+
+  /// Clear GitHub token
+  Future<void> clearGitHubToken() async {
+    await _secureStorage.delete(key: SecureStorageKeys.githubToken);
+  }
+
   // ============================================================
   // EMAIL/PASSWORD AUTHENTICATION
   // ============================================================
 
   /// Sign up with email and password
-  ///
-  /// Parameters:
-  /// - [email]: User's email address
-  /// - [password]: User's password (min 6 characters)
-  /// - [name]: User's display name (optional)
-  ///
-  /// Returns: [UserModel] on success
-  /// Throws: [AuthException] on failure
   Future<UserModel> signUpWithEmail({
     required String email,
     required String password,
@@ -83,13 +105,6 @@ class AuthService {
   }
 
   /// Sign in with email and password
-  ///
-  /// Parameters:
-  /// - [email]: User's email address
-  /// - [password]: User's password
-  ///
-  /// Returns: [UserModel] on success
-  /// Throws: [AuthException] on failure
   Future<UserModel> signInWithEmail({
     required String email,
     required String password,
@@ -125,15 +140,11 @@ class AuthService {
   // ============================================================
 
   /// Sign in with Google
-  ///
-  /// Returns: [UserModel] on success
-  /// Throws: [AuthException] on failure
   Future<UserModel> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
 
       if (googleUser == null) {
-        // This generally indicates user cancellation.
         throw AuthException('Google sign in cancelled');
       }
 
@@ -141,8 +152,7 @@ class AuthService {
       final GoogleSignInAuthentication googleAuth =
       await googleUser.authentication;
 
-      // FIX 3/7: Create credential using ID Token ONLY.
-      // accessToken is removed by default in V7.0+ as it's not needed for Firebase Auth.
+      // Create credential using ID Token ONLY
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
@@ -163,48 +173,248 @@ class AuthService {
     }
   }
 
+  // Add to your AuthService class
+// ============================================================
+// GITHUB PAT AUTHENTICATION
+// ============================================================
+
+  /// Connect with GitHub using Personal Access Token
+  Future<bool> connectWithGitHubToken(String token) async {
+    try {
+      // Validate token format
+      if (token.isEmpty) {
+        throw AuthException('Please enter a valid GitHub token');
+      }
+
+      // Test the token by making a simple API call
+      final isValid = await _validateGitHubToken(token);
+      if (!isValid) {
+        throw AuthException('Invalid GitHub token. Please check and try again.');
+      }
+
+      // Store the valid token
+      await storeGitHubToken(token);
+      return true;
+    } catch (e) {
+      if (e is AuthException) rethrow;
+      throw AuthException('Failed to connect with GitHub: ${e.toString()}');
+    }
+  }
+
+  /// Validate GitHub token by making a test API call
+  Future<bool> _validateGitHubToken(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://api.github.com/user'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Check if GitHub token is available
+  Future<bool> hasGitHubToken() async {
+    final token = await getGitHubToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  /// Disconnect GitHub (remove token)
+  Future<void> disconnectGitHub() async {
+    await clearGitHubToken();
+  }
+
   // ============================================================
-  // GITHUB SIGN-IN
+  // GITHUB SIGN-IN (FIXED VERSION)
   // ============================================================
 
-  /// Sign in with GitHub (Firebase OAuth)
-  ///
-  /// Returns: [UserModel] on success
-  /// Throws: [AuthException] on failure
+  /// Sign in with GitHub (Firebase OAuth) - FIXED VERSION
   Future<UserModel> signInWithGitHub() async {
     try {
       // Create GitHub provider
       final githubProvider = GithubAuthProvider();
-      
+
       // Add scopes for repository access
       githubProvider.addScope('repo');
       githubProvider.addScope('read:user');
+      githubProvider.addScope('user:email');
 
-      // Sign in with popup/redirect
-      final userCredential = await _auth.signInWithProvider(githubProvider);
+      // Set custom parameters to help with sessionStorage issues
+      githubProvider.setCustomParameters({
+        'client_id': _githubClientId,
+        'client_secret': _githubClientSecret,
+        'redirect_uri': _githubRedirectUrl,
+        'allow_signup': 'true',
+        'prompt': 'consent', // Force consent screen to help with state issues
+      });
+
+      final UserCredential userCredential;
+
+      if (kIsWeb) {
+        // Web: Use popup to avoid sessionStorage issues
+        userCredential = await _auth.signInWithPopup(githubProvider);
+      } else {
+        // Mobile: Use signInWithProvider with retry logic
+        try {
+          userCredential = await _auth.signInWithProvider(githubProvider);
+        } catch (e) {
+          // Check if it's a sessionStorage error
+          final errorString = e.toString().toLowerCase();
+          if (errorString.contains('sessionstorage') ||
+              errorString.contains('missing initial state') ||
+              errorString.contains('storage-partitioned')) {
+
+            // RETRY WITH DIFFERENT APPROACH
+            return await _signInWithGitHubFallback();
+          }
+          rethrow;
+        }
+      }
 
       final user = userCredential.user;
       if (user == null) {
-        throw AuthException('GitHub sign in failed');
+        throw AuthException('GitHub sign in failed - no user returned');
       }
 
-      // Get GitHub access token
-      final credential = userCredential.credential as OAuthCredential?;
-      final accessToken = credential?.accessToken;
+      // Get GitHub access token from credential
+      final credential = userCredential.credential;
+      if (credential is OAuthCredential) {
+        final accessToken = credential.accessToken;
 
-      // Store token securely for GitHub API access
-      if (accessToken != null) {
-        await _secureStorage.write(
-          key: SecureStorageKeys.githubToken,
-          value: accessToken,
-        );
+        // Store token securely for GitHub API access
+        if (accessToken != null && accessToken.isNotEmpty) {
+          await storeGitHubToken(accessToken);
+        }
       }
 
       return UserModel.fromFirebaseUser(user);
     } on FirebaseAuthException catch (e) {
+      // Handle specific GitHub OAuth errors
+      if (e.code == 'account-exists-with-different-credential') {
+        throw AuthException(
+            'An account already exists with the same email but different sign-in method. '
+                'Please sign in using that method and link your GitHub account.'
+        );
+      } else if (e.code == 'invalid-credential' || e.code == 'invalid-verification-code') {
+        throw AuthException('GitHub authentication failed. Please try again.');
+      }
+
+      // Check for sessionStorage-related errors
+      if (e.message?.toLowerCase().contains('sessionstorage') == true ||
+          e.message?.toLowerCase().contains('missing initial state') == true) {
+        // Try fallback method
+        return await _signInWithGitHubFallback();
+      }
+
       throw AuthException(_getErrorMessage(e.code));
     } catch (e) {
+      // Handle general errors
+      if (e is AuthException) rethrow;
+
+      final errorString = e.toString().toLowerCase();
+
+      // Check for cancellation
+      if (errorString.contains('canceled') || errorString.contains('cancelled')) {
+        throw AuthException('GitHub sign in was cancelled');
+      }
+
+      // Check for sessionStorage errors
+      if (errorString.contains('sessionstorage') ||
+          errorString.contains('missing initial state') ||
+          errorString.contains('storage-partitioned')) {
+        // Try fallback method
+        return await _signInWithGitHubFallback();
+      }
+
       throw AuthException('GitHub sign in failed: ${e.toString()}');
+    }
+  }
+
+  /// Fallback method for GitHub sign-in when sessionStorage fails
+  Future<UserModel> _signInWithGitHubFallback() async {
+    try {
+      // Alternative approach: Use deep link flow
+      final githubProvider = GithubAuthProvider();
+      githubProvider.addScope('repo');
+      githubProvider.addScope('read:user');
+      githubProvider.addScope('user:email');
+
+      // Set different parameters for fallback
+      githubProvider.setCustomParameters({
+        'allow_signup': 'true',
+        'prompt': 'login', // Force fresh login
+      });
+
+      // Use a different approach - sign in with redirect then get result
+      if (kIsWeb) {
+        await _auth.signInWithRedirect(githubProvider);
+        // On web, this will redirect away from the app
+        throw AuthException('Redirect completed - please check the browser');
+      } else {
+        // On mobile, try one more time with the regular approach
+        // Sometimes it works on second attempt
+        final userCredential = await _auth.signInWithProvider(githubProvider);
+        final user = userCredential.user;
+
+        if (user == null) {
+          throw AuthException('GitHub sign in failed after retry');
+        }
+
+        // Store token if available
+        final credential = userCredential.credential;
+        if (credential is OAuthCredential) {
+          final accessToken = credential.accessToken;
+          if (accessToken != null && accessToken.isNotEmpty) {
+            await storeGitHubToken(accessToken);
+          }
+        }
+
+        return UserModel.fromFirebaseUser(user);
+      }
+    } catch (e) {
+      throw AuthException(
+          'GitHub authentication requires browser storage access. '
+              'Please try:\n\n'
+              '1. Update your browser to the latest version\n'
+              '2. Clear browser cache and cookies\n'
+              '3. Try using Email/Password or Google sign-in instead\n'
+              '4. Try again in a few minutes'
+      );
+    }
+  }
+
+  /// Check for pending redirect result (primarily for web)
+  Future<UserModel?> getRedirectResult() async {
+    try {
+      // Only check redirect result on web
+      if (!kIsWeb) {
+        return null;
+      }
+
+      final userCredential = await _auth.getRedirectResult();
+
+      if (userCredential.user == null) {
+        return null;
+      }
+
+      // Get GitHub access token if available
+      final credential = userCredential.credential;
+      if (credential is OAuthCredential) {
+        final accessToken = credential.accessToken;
+        if (accessToken != null && accessToken.isNotEmpty) {
+          await storeGitHubToken(accessToken);
+        }
+      }
+
+      return UserModel.fromFirebaseUser(userCredential.user!);
+    } catch (e) {
+      // Silently fail - this might not be a GitHub redirect
+      return null;
     }
   }
 
@@ -213,9 +423,6 @@ class AuthService {
   // ============================================================
 
   /// Sign in as guest (anonymous)
-  ///
-  /// Returns: [UserModel] on success
-  /// Throws: [AuthException] on failure
   Future<UserModel> signInAsGuest() async {
     try {
       final userCredential = await _auth.signInAnonymously();
@@ -234,13 +441,6 @@ class AuthService {
   }
 
   /// Convert guest account to permanent account
-  ///
-  /// Parameters:
-  /// - [email]: User's email address
-  /// - [password]: User's password
-  ///
-  /// Returns: [UserModel] on success
-  /// Throws: [AuthException] on failure
   Future<UserModel> convertGuestToUser({
     required String email,
     required String password,
@@ -260,8 +460,7 @@ class AuthService {
       );
 
       // Link credential to current anonymous user
-      final userCredential =
-      await currentUser!.linkWithCredential(credential);
+      final userCredential = await currentUser!.linkWithCredential(credential);
 
       final user = userCredential.user;
       if (user == null) {
@@ -281,11 +480,6 @@ class AuthService {
   // ============================================================
 
   /// Send password reset email
-  ///
-  /// Parameters:
-  /// - [email]: User's email address
-  ///
-  /// Throws: [AuthException] on failure
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       _validateEmail(email);
@@ -298,11 +492,6 @@ class AuthService {
   }
 
   /// Update password (for logged-in user)
-  ///
-  /// Parameters:
-  /// - [newPassword]: New password (min 6 characters)
-  ///
-  /// Throws: [AuthException] on failure
   Future<void> updatePassword(String newPassword) async {
     try {
       if (currentUser == null) {
@@ -338,7 +527,6 @@ class AuthService {
     }
   }
 
-
   /// Update email
   Future<void> updateEmail(String newEmail) async {
     final user = _auth.currentUser;
@@ -349,14 +537,7 @@ class AuthService {
     _validateEmail(newEmail);
 
     try {
-      // ✅ FIX: Use verifyBeforeUpdateEmail() instead of updateEmail()
-      // This is the modern Firebase Auth approach that sends a verification email first
       await user.verifyBeforeUpdateEmail(newEmail);
-
-      // Note: The email won't be updated immediately. The user needs to
-      // verify the new email address via the link sent to them.
-      // After verification, they should sign in again for the change to take effect.
-
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
         throw AuthException('requires-recent-login');
@@ -366,7 +547,6 @@ class AuthService {
       throw AuthException('Failed to update email: ${e.toString()}');
     }
   }
-
 
   /// Send email verification
   Future<void> sendEmailVerification() async {
@@ -401,10 +581,11 @@ class AuthService {
   /// Sign out current user
   Future<void> signOut() async {
     try {
-      // ✅ FIX: In v7.2.0, there's no currentUser getter anymore!
-      // Just call signOut() - it handles checking internally
-      // It's safe to call even if no Google user is signed in
+      // Sign out from Google
       await _googleSignIn.signOut();
+
+      // Clear GitHub token
+      await clearGitHubToken();
 
       // Sign out from Firebase
       await _auth.signOut();
@@ -413,7 +594,6 @@ class AuthService {
     }
   }
 
-
   /// Delete current user account
   Future<void> deleteAccount() async {
     try {
@@ -421,6 +601,8 @@ class AuthService {
         throw AuthException('No user signed in');
       }
 
+      // Clear GitHub token before deleting account
+      await clearGitHubToken();
       await currentUser!.delete();
     } on FirebaseAuthException catch (e) {
       throw AuthException(_getErrorMessage(e.code));
@@ -430,7 +612,7 @@ class AuthService {
   }
 
   // ============================================================
-  // REAUTHENTICATION (Required for sensitive operations)
+  // REAUTHENTICATION
   // ============================================================
 
   /// Reauthenticate with email/password
@@ -463,7 +645,6 @@ class AuthService {
         throw AuthException('No user signed in');
       }
 
-      // ✅ FIX: Use await with authenticate (was already correct)
       final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
 
       if (googleUser == null) {
@@ -539,6 +720,10 @@ class AuthService {
         return 'Network error. Check your internet connection';
       case 'requires-recent-login':
         return 'Please sign in again to continue';
+      case 'account-exists-with-different-credential':
+        return 'An account already exists with this email';
+      case 'invalid-credential':
+        return 'Invalid authentication credentials';
       default:
         return 'Authentication error: $code';
     }
@@ -576,11 +761,6 @@ class AuthService {
     if (currentUser == null) return false;
     return currentUser!.providerData
         .any((info) => info.providerId == 'github.com');
-  }
-
-  /// Get stored GitHub token from secure storage
-  Future<String?> getGitHubToken() async {
-    return await _secureStorage.read(key: SecureStorageKeys.githubToken);
   }
 
   /// Get provider name

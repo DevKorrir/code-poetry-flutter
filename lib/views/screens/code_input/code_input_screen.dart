@@ -6,6 +6,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../../viewmodels/poem_generator_viewmodel.dart';
 import '../../widgets/common/custom_button.dart';
+import '../github/github_token_screen.dart';
 import '../style_selector/style_selector_screen.dart';
 import '../../../core/services/github_service.dart';
 import '../github/github_connect_screen.dart';
@@ -110,20 +111,20 @@ class _CodeInputScreenState extends State<CodeInputScreen>
   }
 
   /// Import code from GitHub repositories
-  /// 
-  /// Uses a callback-based approach for robust navigation that works
-  /// regardless of how deep the user navigates into repository folders.
+  /// Import code from GitHub repositories using PAT
   Future<void> _importFromGitHub() async {
-    // Check if connected
-    if (!GitHubService().isAuthenticated) {
+    // Check if connected using PAT
+    final isConnected = await GitHubService().isAuthenticated;
+
+    if (!isConnected) {
       if (!mounted) return;
       final connected = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const GitHubConnectScreen(),
+          builder: (context) => const GitHubTokenScreen(), // Use new PAT screen
         ),
       );
-      
+
       if (connected != true) return;
     }
 
@@ -134,13 +135,9 @@ class _CodeInputScreenState extends State<CodeInputScreen>
       MaterialPageRoute(
         builder: (context) => GitHubRepositoryBrowser(
           onFileImported: (String code) {
-            // This callback is executed when a file is selected
-            // Handles data passing explicitly instead of relying on Navigator.pop
             _codeController.text = code;
-            
             HapticFeedback.mediumImpact();
-            
-            // Show success message after navigation completes
+
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(

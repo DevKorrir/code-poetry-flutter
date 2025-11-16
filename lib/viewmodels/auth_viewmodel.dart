@@ -65,6 +65,19 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> initialize() async {
     _currentUser = _authRepository.currentUser;
 
+    // Check for pending GitHub OAuth redirect result (web only)
+    // On mobile, signInWithProvider() handles OAuth directly without redirects
+    try {
+      final redirectUser = await _authRepository.checkPendingRedirectResult();
+      if (redirectUser != null) {
+        _currentUser = redirectUser;
+        _setSuccess('Connected with GitHub!');
+        notifyListeners();
+      }
+    } catch (e) {
+      // Ignore errors - redirect check is best effort (mainly for web)
+    }
+
     // Listen to auth state changes
     _authRepository.authStateChanges.listen((user) {
       _currentUser = user;

@@ -83,14 +83,22 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
+    // Get auth viewmodel
+    final authViewModel = context.read<AuthViewModel>();
+    
+    // Give a moment for redirect result to be processed if app just reopened
+    // This handles GitHub OAuth redirect on mobile
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
     // Check if onboarding is complete
     final storageService = context.read<StorageService>();
     final hasCompletedOnboarding = storageService.getBool(
       StorageKeys.isOnboardingComplete,
     ) ?? false;
 
-    // Check authentication status
-    final authViewModel = context.read<AuthViewModel>();
+    // Check authentication status (after redirect result check)
     final isAuthenticated = authViewModel.isAuthenticated;
 
     // Navigate to appropriate screen
