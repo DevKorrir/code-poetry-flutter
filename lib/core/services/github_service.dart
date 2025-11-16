@@ -242,16 +242,16 @@ class GitHubService {
   // HTTP HELPER
   // ============================================================
 
-  /// Make authenticated request
+  /// Make authenticated request with PAT
   Future<dynamic> _makeRequest(String endpoint) async {
     final token = await _getAccessToken();
-    
+
     if (token == null || token.isEmpty) {
-      throw GitHubException('Not authenticated with GitHub');
+      throw GitHubException('Not connected to GitHub. Please add your Personal Access Token.');
     }
 
     final url = Uri.parse('$_baseUrl$endpoint');
-    
+
     final response = await _client.get(
       url,
       headers: {
@@ -263,7 +263,7 @@ class GitHubService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else if (response.statusCode == 401) {
-      throw GitHubException('GitHub authentication expired');
+      throw GitHubException('GitHub token is invalid or expired. Please reconnect.');
     } else if (response.statusCode == 404) {
       throw GitHubException('Resource not found');
     } else if (response.statusCode == 403) {
@@ -271,7 +271,7 @@ class GitHubService {
       final message = body['message'] ?? 'API rate limit exceeded';
       throw GitHubException(message);
     } else {
-      throw GitHubException('Request failed: ${response.statusCode}');
+      throw GitHubException('GitHub API request failed: ${response.statusCode}');
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import '../../models/user_model.dart';
 import 'secure_storage_service.dart';
 
@@ -170,6 +171,62 @@ class AuthService {
     } catch (e) {
       throw AuthException('Google sign in failed: ${e.toString()}');
     }
+  }
+
+  // Add to your AuthService class
+// ============================================================
+// GITHUB PAT AUTHENTICATION
+// ============================================================
+
+  /// Connect with GitHub using Personal Access Token
+  Future<bool> connectWithGitHubToken(String token) async {
+    try {
+      // Validate token format
+      if (token.isEmpty) {
+        throw AuthException('Please enter a valid GitHub token');
+      }
+
+      // Test the token by making a simple API call
+      final isValid = await _validateGitHubToken(token);
+      if (!isValid) {
+        throw AuthException('Invalid GitHub token. Please check and try again.');
+      }
+
+      // Store the valid token
+      await storeGitHubToken(token);
+      return true;
+    } catch (e) {
+      if (e is AuthException) rethrow;
+      throw AuthException('Failed to connect with GitHub: ${e.toString()}');
+    }
+  }
+
+  /// Validate GitHub token by making a test API call
+  Future<bool> _validateGitHubToken(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://api.github.com/user'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Check if GitHub token is available
+  Future<bool> hasGitHubToken() async {
+    final token = await getGitHubToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  /// Disconnect GitHub (remove token)
+  Future<void> disconnectGitHub() async {
+    await clearGitHubToken();
   }
 
   // ============================================================
