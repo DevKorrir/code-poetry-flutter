@@ -166,16 +166,13 @@ class AuthService {
   }
 
   // ============================================================
-  // GITHUB SIGN-IN (UPDATED)
+  // GITHUB SIGN-IN (FIXED VERSION)
   // ============================================================
 
-  /// Sign in with GitHub using Firebase OAuth
-  ///
-  /// Web: Uses popup-based authentication (signInWithPopup)
-  /// Mobile: Uses provider-based authentication (signInWithProvider)
+  /// Sign in with GitHub (Firebase OAuth) - FIXED VERSION
   Future<UserModel> signInWithGitHub() async {
     try {
-      // Create GitHub provider - FIXED: Use correct provider class
+      // Create GitHub provider
       final githubProvider = GithubAuthProvider();
 
       // Add scopes for repository access
@@ -183,9 +180,10 @@ class AuthService {
       githubProvider.addScope('read:user');
       githubProvider.addScope('user:email');
 
-      // Set custom parameters
+      // Set custom parameters to help with sessionStorage issues
       githubProvider.setCustomParameters({
         'allow_signup': 'true',
+        'prompt': 'consent', // Force consent screen to help with state issues
       });
 
       final UserCredential userCredential;
@@ -194,8 +192,21 @@ class AuthService {
         // Web: Use popup to avoid sessionStorage issues
         userCredential = await _auth.signInWithPopup(githubProvider);
       } else {
-        // Mobile: Use signInWithProvider
-        userCredential = await _auth.signInWithProvider(githubProvider);
+        // Mobile: Use signInWithProvider with retry logic
+        try {
+          userCredential = await _auth.signInWithProvider(githubProvider);
+        } catch (e) {
+          // Check if it's a sessionStorage error
+          final errorString = e.toString().toLowerCase();
+          if (errorString.contains('sessionstorage') ||
+              errorString.contains('missing initial state') ||
+              errorString.contains('storage-partitioned')) {
+
+            // RETRY WITH DIFFERENT APPROACH
+            return await _signInWithGitHubFallback();
+          }
+          rethrow;
+        }
       }
 
       final user = userCredential.user;
@@ -224,24 +235,13 @@ class AuthService {
         );
       } else if (e.code == 'invalid-credential' || e.code == 'invalid-verification-code') {
         throw AuthException('GitHub authentication failed. Please try again.');
-      } else if (e.code == 'user-disabled') {
-        throw AuthException('This account has been disabled.');
-      } else if (e.code == 'user-not-found') {
-        throw AuthException('No GitHub account found.');
-      } else if (e.code == 'network-request-failed') {
-        throw AuthException('Network error. Please check your internet connection.');
       }
 
-      // Check for sessionStorage-related errors (web)
+      // Check for sessionStorage-related errors
       if (e.message?.toLowerCase().contains('sessionstorage') == true ||
           e.message?.toLowerCase().contains('missing initial state') == true) {
-        throw AuthException(
-            'GitHub authentication requires browser storage access. '
-                'Please try:\n'
-                '1. Clear your browser cache and try again\n'
-                '2. Disable privacy extensions temporarily\n'
-                '3. Use Email/Password or Google sign-in instead'
-        );
+        // Try fallback method
+        return await _signInWithGitHubFallback();
       }
 
       throw AuthException(_getErrorMessage(e.code));
@@ -260,16 +260,64 @@ class AuthService {
       if (errorString.contains('sessionstorage') ||
           errorString.contains('missing initial state') ||
           errorString.contains('storage-partitioned')) {
-        throw AuthException(
-            'GitHub authentication requires browser storage access. '
-                'Please try:\n'
-                '1. Clear your browser cache and try again\n'
-                '2. Disable privacy extensions temporarily\n'
-                '3. Use Email/Password or Google sign-in instead'
-        );
+        // Try fallback method
+        return await _signInWithGitHubFallback();
       }
 
       throw AuthException('GitHub sign in failed: ${e.toString()}');
+    }
+  }
+
+  /// Fallback method for GitHub sign-in when sessionStorage fails
+  Future<UserModel> _signInWithGitHubFallback() async {
+    try {
+      // Alternative approach: Use deep link flow
+      final githubProvider = GithubAuthProvider();
+      githubProvider.addScope('repo');
+      githubProvider.addScope('read:user');
+      githubProvider.addScope('user:email');
+
+      // Set different parameters for fallback
+      githubProvider.setCustomParameters({
+        'allow_signup': 'true',
+        'prompt': 'login', // Force fresh login
+      });
+
+      // Use a different approach - sign in with redirect then get result
+      if (kIsWeb) {
+        await _auth.signInWithRedirect(githubProvider);
+        // On web, this will redirect away from the app
+        throw AuthException('Redirect completed - please check the browser');
+      } else {
+        // On mobile, try one more time with the regular approach
+        // Sometimes it works on second attempt
+        final userCredential = await _auth.signInWithProvider(githubProvider);
+        final user = userCredential.user;
+
+        if (user == null) {
+          throw AuthException('GitHub sign in failed after retry');
+        }
+
+        // Store token if available
+        final credential = userCredential.credential;
+        if (credential is OAuthCredential) {
+          final accessToken = credential.accessToken;
+          if (accessToken != null && accessToken.isNotEmpty) {
+            await storeGitHubToken(accessToken);
+          }
+        }
+
+        return UserModel.fromFirebaseUser(user);
+      }
+    } catch (e) {
+      throw AuthException(
+          'GitHub authentication requires browser storage access. '
+              'Please try:\n\n'
+              '1. Update your browser to the latest version\n'
+              '2. Clear browser cache and cookies\n'
+              '3. Try using Email/Password or Google sign-in instead\n'
+              '4. Try again in a few minutes'
+      );
     }
   }
 
