@@ -63,59 +63,69 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _signInWithGitHub() async {
-    final authViewModel = context.read<AuthViewModel>();
-    
-    try {
-      final success = await authViewModel.signInWithGitHub();
-
-      if (success && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      } else if (mounted && authViewModel.error != null) {
-        // Check if this is a redirect in progress (mobile only)
-        // Don't show error - app will redirect and come back
-        if (authViewModel.error == 'redirect_in_progress') {
-          // App will close and reopen after GitHub authorization
-          // Redirect result will be handled on app resume
-          return;
-        }
-        
-        // Check if it's a sessionStorage error - show dialog instead of snackbar
-        final error = authViewModel.error!;
-        if (error.contains('browser storage access') || 
-            error.contains('sessionStorage') ||
-            error.contains('missing initial state')) {
-          _showGitHubErrorDialog(error);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error)),
-          );
-        }
-      }
-    } catch (e) {
-      // Handle any unexpected errors
-      // Don't show error if it's redirect_in_progress
-      if (mounted && e.toString().contains('redirect_in_progress')) {
-        // App will redirect, don't show error
-        return;
-      }
-      
-      if (mounted) {
-        final errorMsg = e.toString();
-        if (errorMsg.contains('browser storage access') || 
-            errorMsg.contains('sessionStorage') ||
-            errorMsg.contains('missing initial state')) {
-          _showGitHubErrorDialog(errorMsg);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('GitHub sign in failed: $errorMsg')),
-          );
-        }
-      }
-    }
+  // Updated to just show "Coming Soon"
+  void _signInWithGitHub() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("GitHub Login coming soon!"),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
+
+  // Future<void> _signInWithGitHub() async {
+  //   final authViewModel = context.read<AuthViewModel>();
+  //
+  //   try {
+  //     final success = await authViewModel.signInWithGitHub();
+  //
+  //     if (success && mounted) {
+  //       Navigator.of(context).pushReplacement(
+  //         MaterialPageRoute(builder: (context) => const HomeScreen()),
+  //       );
+  //     } else if (mounted && authViewModel.error != null) {
+  //       // Check if this is a redirect in progress (mobile only)
+  //       // Don't show error - app will redirect and come back
+  //       if (authViewModel.error == 'redirect_in_progress') {
+  //         // App will close and reopen after GitHub authorization
+  //         // Redirect result will be handled on app resume
+  //         return;
+  //       }
+  //
+  //       // Check if it's a sessionStorage error - show dialog instead of snackbar
+  //       final error = authViewModel.error!;
+  //       if (error.contains('browser storage access') ||
+  //           error.contains('sessionStorage') ||
+  //           error.contains('missing initial state')) {
+  //         _showGitHubErrorDialog(error);
+  //       } else {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text(error)),
+  //         );
+  //       }
+  //     }
+  //   } catch (e) {
+  //     // Handle any unexpected errors
+  //     // Don't show error if it's redirect_in_progress
+  //     if (mounted && e.toString().contains('redirect_in_progress')) {
+  //       // App will redirect, don't show error
+  //       return;
+  //     }
+  //
+  //     if (mounted) {
+  //       final errorMsg = e.toString();
+  //       if (errorMsg.contains('browser storage access') ||
+  //           errorMsg.contains('sessionStorage') ||
+  //           errorMsg.contains('missing initial state')) {
+  //         _showGitHubErrorDialog(errorMsg);
+  //       } else {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('GitHub sign in failed: $errorMsg')),
+  //         );
+  //       }
+  //     }
+  //   }
+  // }
 
   void _showGitHubErrorDialog(String message) {
     showDialog(
@@ -248,7 +258,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: AppStrings.loginWithGoogle,
                   onPressed: _signInWithGoogle,
                   isOutlined: true,
-                  leadingIcon: const Icon(Icons.g_mobiledata, size: 28),
+                  leadingIcon: Image.network(
+                    'https://developers.google.com/identity/images/g-logo.png',
+                    height: 24,
+                    width: 24,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback in case of network error
+                      return const Icon(Icons.g_mobiledata, size: 28);
+                    },
+                  ),
                   isLoading: authViewModel.isLoading,
                 ),
 
