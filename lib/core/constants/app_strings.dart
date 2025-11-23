@@ -44,8 +44,8 @@ class AppStrings {
   static const String loginWithGoogle = 'Continue with Google';
   static const String loginWithGitHub = 'Continue with GitHub';
   static const String loginAsGuest = 'Continue as Guest';
-  static const String loginHaveAccount = 'Correct here';
-  static const String loginSignIn = 'Correct here';
+  static const String loginHaveAccount = 'Already have an account?';
+  static const String loginSignIn = 'Sign In';
 
   static const String signupTitle = 'Create Account';
   static const String signupSubtitle = 'Join the poetry revolution';
@@ -57,7 +57,7 @@ class AppStrings {
   static const String signupHaveAccount = 'Already have an account?';
   static const String signupSignIn = 'Sign In';
 
-  static const String guestModeTitle = 'Try Without Sign Up';
+  static const String guestModeTitle = 'Try Without Signing Up';
   static const String guestModeDesc =
       'Generate 3 poems for free. Sign up to save unlimited poems.';
   static const String guestModeContinue = 'Continue as Guest';
@@ -121,7 +121,7 @@ class AppStrings {
   static const String poemReadAloud = 'Read Aloud';
   static const String poemSaved = 'Poem saved to gallery';
   static const String poemShared = 'Poem shared';
-  static const String successMessage = 'Poem suxxess';
+  static const String successMessage = 'Poem generated successfully';
 
   // ============================================================
   // GALLERY
@@ -180,8 +180,8 @@ class AppStrings {
 
   static const String guestLimitTitle = 'Daily Limit Reached';
   static const String guestLimitDesc =
-      'You\'ve used all 3 free poems. Sign up for 5 poems per day!';
-  static const String freeLimitTitle = '5 Poems Today';
+      'You\'ve used all 3 free poems. Sign up to get 5 poems per day!';
+  static const String freeLimitTitle = '5 Poems Used Today';
   static const String freeLimitDesc =
       'You\'ve reached your daily limit. Upgrade to Pro for unlimited poems!';
 
