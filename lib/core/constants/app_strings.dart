@@ -57,7 +57,7 @@ class AppStrings {
   static const String signupHaveAccount = 'Already have an account?';
   static const String signupSignIn = 'Sign In';
 
-  static const String guestModeTitle = 'Try Without Signing Up';
+  static const String guestModeTitle = 'Try It Without Signing Up';
   static const String guestModeDesc =
       'Generate 3 poems for free. Sign up to save unlimited poems.';
   static const String guestModeContinue = 'Continue as Guest';
@@ -68,7 +68,7 @@ class AppStrings {
   // ============================================================
   static const String homeWelcome = 'Welcome to Code Poetry';
   static const String homeWelcomeBack = 'Welcome back';
-  static const String homeSubtitle = 'What would you like to poetize today?';
+  static const String homeSubtitle = 'What would you like to turn into poetry today?';
   static const String homeNewPoem = 'Create New Poem';
   static const String homeGallery = 'My Gallery';
   static const String homeRecentPoems = 'Recent Poems';

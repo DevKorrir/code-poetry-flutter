@@ -25,11 +25,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   final List<OnboardingPage> _pages = const [
     OnboardingPage(
       icon: Icons.favorite_rounded,
-      gradient: LinearGradient(
-        colors: [Color(0xFFF093FB), Color(0xFFF5576C)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
+      gradient: AppColors.accentGradient,
       title: AppStrings.onboardingTitle1,
       description: AppStrings.onboardingDesc1,
       particles: [
@@ -41,11 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     ),
     OnboardingPage(
       icon: Icons.auto_awesome_rounded,
-      gradient: LinearGradient(
-        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
+      gradient: AppColors.secondaryGradient,
       title: AppStrings.onboardingTitle2,
       description: AppStrings.onboardingDesc2,
       particles: [
@@ -57,11 +49,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     ),
     OnboardingPage(
       icon: Icons.share_rounded,
-      gradient: LinearGradient(
-        colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
+      gradient: AppColors.primaryGradient,
       title: AppStrings.onboardingTitle3,
       description: AppStrings.onboardingDesc3,
       particles: [
@@ -161,7 +149,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     children: [
                       if (_currentPage < _pages.length - 1)
                         Material(
-                          color: Colors.white.withOpacity(0.2),
+                          color: AppColors.darkSurfaceLight,
                           borderRadius: BorderRadius.circular(20),
                           child: InkWell(
                             onTap: _skip,
@@ -260,7 +248,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   width: 180,
                   height: 180,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
+                    color: AppColors.darkSurfaceLight,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -273,13 +261,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   child: Container(
                     margin: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
+                      color: AppColors.darkSurface,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       page.icon,
                       size: 90,
-                      color: Colors.white,
+                      color: AppColors.primaryStart,
                     ),
                   ),
                 ),
@@ -328,7 +316,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               child: Text(
                 page.description,
                 style: AppTextStyles.bodyLarge(
-                  color: Colors.white.withOpacity(0.95),
+                  color: Colors.white,
                 ).copyWith(
                   fontSize: 16,
                   height: 1.6,
@@ -354,13 +342,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           height: 8,
           decoration: BoxDecoration(
             color: _currentPage == index
-                ? Colors.white
-                : Colors.white.withOpacity(0.4),
+                ? AppColors.primaryStart
+                : AppColors.darkSurfaceLight,
             borderRadius: BorderRadius.circular(4),
             boxShadow: _currentPage == index
                 ? [
               BoxShadow(
-                color: Colors.white.withOpacity(0.4),
+                color: AppColors.primaryStart.withOpacity(0.5),
                 blurRadius: 8,
                 spreadRadius: 1,
               ),
@@ -378,14 +366,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: AppColors.darkBackground.withOpacity(0.7),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Material(
-        color: Colors.white,
+        color: AppColors.darkBackground,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: _next,
@@ -402,7 +390,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ? AppStrings.onboardingGetStarted
                       : AppStrings.onboardingNext,
                   style: AppTextStyles.labelLarge(
-                    color: _pages[_currentPage].gradient.colors[0],
+                    color: AppColors.primaryStart,
                   ).copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -413,7 +401,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   _currentPage == _pages.length - 1
                       ? Icons.check_circle_rounded
                       : Icons.arrow_forward_rounded,
-                  color: _pages[_currentPage].gradient.colors[0],
+                  color: AppColors.primaryStart,
                   size: 22,
                 ),
               ],

@@ -54,17 +54,17 @@ class AppColors {
   // BRAND COLORS (Gradients)
   // ============================================================
 
-  /// Primary gradient - Purple-Blue
-  static const Color primaryStart = Color(0xFF6E40C9);
-  static const Color primaryEnd = Color(0xFF2D7FF9);
+  /// Primary gradient - Bright Green
+  static const Color primaryStart = Color(0xFF3FB950);
+  static const Color primaryEnd = Color(0xFF2EA043);
 
   /// Secondary gradient - Cyan
   static const Color secondaryStart = Color(0xFF2D7FF9);
   static const Color secondaryEnd = Color(0xFF79C0FF);
 
-  /// Accent gradient - Pink-Orange (for special elements)
-  static const Color accentStart = Color(0xFFF778BA);
-  static const Color accentEnd = Color(0xFFFFA7D4);
+  /// Accent gradient - Blue-Green (for special elements)
+  static const Color accentStart = Color(0xFF1F6FEB);
+  static const Color accentEnd = Color(0xFF2D7FF9);
 
   /// Success gradient - Green
   static const Color successStart = Color(0xFF3FB950);
@@ -115,7 +115,7 @@ class AppColors {
   // SYNTAX HIGHLIGHTING COLORS (for code editor)
   // ============================================================
 
-  static const Color syntaxKeyword = Color(0xFFFF7B72);
+  static const Color syntaxKeyword = Color(0xFFD73A49);
   static const Color syntaxString = Color(0xFFA5D6FF);
   static const Color syntaxComment = Color(0xFF8B949E);
   static const Color syntaxFunction = Color(0xFFD2A8FF);
@@ -242,8 +242,8 @@ class PoetryStyleColors {
   );
 
   // Free Verse - Creative, flowing (Pink)
-  static const Color freeVersePrimary = Color(0xFFF778BA);
-  static const Color freeVerseSecondary = Color(0xFFFFA7D4);
+  static const Color freeVersePrimary = Color(0xFF1F6FEB);
+  static const Color freeVerseSecondary = Color(0xFF2D7FF9);
   static const LinearGradient freeVerseGradient = LinearGradient(
     colors: [freeVersePrimary, freeVerseSecondary],
     begin: Alignment.topLeft,
