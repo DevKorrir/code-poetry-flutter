@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/text_styles.dart';
@@ -277,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: AppStrings.loginWithGitHub,
                   onPressed: _signInWithGitHub,
                   isOutlined: true,
-                  leadingIcon: const Icon(Icons.code, size: 24),
+                  leadingIcon: const FaIcon(FontAwesomeIcons.github, size: 24),
                   isLoading: authViewModel.isLoading,
                 ),
 

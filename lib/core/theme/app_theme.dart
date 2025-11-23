@@ -191,21 +191,36 @@ class AppTheme {
 
     // Text Theme
     textTheme: TextTheme(
-      displayLarge: AppTextStyles.h1(),
-      displayMedium: AppTextStyles.h2(),
-      displaySmall: AppTextStyles.h3(),
-      headlineLarge: AppTextStyles.h3(),
-      headlineMedium: AppTextStyles.h4(),
-      headlineSmall: AppTextStyles.h5(),
-      titleLarge: AppTextStyles.h4(),
-      titleMedium: AppTextStyles.h5(),
-      titleSmall: AppTextStyles.labelLarge(),
-      bodyLarge: AppTextStyles.bodyLarge(),
-      bodyMedium: AppTextStyles.bodyMedium(),
-      bodySmall: AppTextStyles.bodySmall(),
-      labelLarge: AppTextStyles.labelLarge(),
-      labelMedium: AppTextStyles.labelMedium(),
-      labelSmall: AppTextStyles.labelSmall(),
+      displayLarge:
+          AppTextStyles.h1(color: AppColors.darkTextPrimary),
+      displayMedium:
+          AppTextStyles.h2(color: AppColors.darkTextPrimary),
+      displaySmall:
+          AppTextStyles.h3(color: AppColors.darkTextPrimary),
+      headlineLarge:
+          AppTextStyles.h3(color: AppColors.darkTextPrimary),
+      headlineMedium:
+          AppTextStyles.h4(color: AppColors.darkTextPrimary),
+      headlineSmall:
+          AppTextStyles.h5(color: AppColors.darkTextPrimary),
+      titleLarge:
+          AppTextStyles.h4(color: AppColors.darkTextPrimary),
+      titleMedium:
+          AppTextStyles.h5(color: AppColors.darkTextPrimary),
+      titleSmall:
+          AppTextStyles.labelLarge(color: AppColors.darkTextPrimary),
+      bodyLarge:
+          AppTextStyles.bodyLarge(color: AppColors.darkTextSecondary),
+      bodyMedium:
+          AppTextStyles.bodyMedium(color: AppColors.darkTextSecondary),
+      bodySmall:
+          AppTextStyles.bodySmall(color: AppColors.darkTextTertiary),
+      labelLarge:
+          AppTextStyles.labelLarge(color: AppColors.darkTextSecondary),
+      labelMedium:
+          AppTextStyles.labelMedium(color: AppColors.darkTextSecondary),
+      labelSmall:
+          AppTextStyles.labelSmall(color: AppColors.darkTextTertiary),
     ),
   );
 
