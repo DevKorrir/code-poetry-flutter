@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/text_styles.dart';
@@ -9,7 +10,6 @@ import '../../widgets/common/custom_button.dart';
 import '../github/github_token_screen.dart';
 import '../style_selector/style_selector_screen.dart';
 import '../../../core/services/github_service.dart';
-import '../github/github_connect_screen.dart';
 import '../github/github_repository_browser.dart';
 
 /// Code Input Screen
@@ -121,7 +121,7 @@ class _CodeInputScreenState extends State<CodeInputScreen>
       final connected = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const GitHubTokenScreen(), // Use new PAT screen
+          builder: (context) => const GitHubTokenScreen(),
         ),
       );
 
@@ -214,7 +214,7 @@ class _CodeInputScreenState extends State<CodeInputScreen>
         title: const Text(AppStrings.codeInputTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.code),
+            icon: const FaIcon(FontAwesomeIcons.github),
             tooltip: 'Import from GitHub',
             onPressed: _importFromGitHub,
           ),
@@ -369,7 +369,11 @@ class _CodeInputScreenState extends State<CodeInputScreen>
               value: viewModel.language,
               isExpanded: true,
               icon: const Icon(Icons.arrow_drop_down),
-              style: AppTextStyles.bodyMedium(),
+              style: AppTextStyles.bodyMedium(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+              ),
               dropdownColor: isDark
                   ? AppColors.darkSurface
                   : AppColors.lightSurface,
@@ -384,7 +388,14 @@ class _CodeInputScreenState extends State<CodeInputScreen>
                         color: AppColors.primaryStart,
                       ),
                       const SizedBox(width: 12),
-                      Text(language),
+                      Text(
+                        language,
+                        style: AppTextStyles.bodyMedium(
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
+                        ),
+                      ),
                     ],
                   ),
                 );

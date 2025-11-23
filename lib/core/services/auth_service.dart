@@ -18,8 +18,12 @@ class AuthService {
   // Firebase instances
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Modern, Corrected Initialization
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  // Google Sign-In client for mobile (google_sign_in 6.x)
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>[
+      'email',
+    ],
+  );
 
   // Secure storage for sensitive credentials
   final SecureStorageService _secureStorage = SecureStorageService();
@@ -142,7 +146,8 @@ class AuthService {
   /// Sign in with Google
   Future<UserModel> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
+      // Start interactive sign-in flow (6.x API)
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         throw AuthException('Google sign in cancelled');
@@ -150,10 +155,11 @@ class AuthService {
 
       // Obtain auth details
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
-      // Create credential using ID Token ONLY
+      // Create Firebase credential using access token and ID token
       final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
@@ -645,16 +651,18 @@ class AuthService {
         throw AuthException('No user signed in');
       }
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
+      // Run the same interactive Google flow again using 6.x API
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         throw AuthException('Google sign in cancelled');
       }
 
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 

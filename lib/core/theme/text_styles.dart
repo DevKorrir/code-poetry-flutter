@@ -27,7 +27,7 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     height: 1.2,
     letterSpacing: -0.5,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color,
   );
 
   /// H2 - Section headers
@@ -36,7 +36,7 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     height: 1.3,
     letterSpacing: -0.3,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color,
   );
 
   /// H3 - Card headers
@@ -44,7 +44,7 @@ class AppTextStyles {
     fontSize: 24,
     fontWeight: FontWeight.w600,
     height: 1.3,
-    color: color ?? AppColors.darkTextTertiary,
+    color: color,
   );
 
   /// H4 - Small headers
@@ -52,7 +52,7 @@ class AppTextStyles {
     fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1.4,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color,
   );
 
   /// H5 - Tiny headers
@@ -60,7 +60,7 @@ class AppTextStyles {
     fontSize: 18,
     fontWeight: FontWeight.w600,
     height: 1.4,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color,
   );
 
   // ============================================================
@@ -72,7 +72,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.normal,
     height: 1.5,
-    color: color ?? AppColors.darkTextSecondary,
+    color: color,
   );
 
   /// Body Medium - Secondary content
@@ -80,7 +80,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.normal,
     height: 1.5,
-    color: color ?? AppColors.darkTextSecondary,
+    color: color,
   );
 
   /// Body Small - Tertiary content
@@ -88,7 +88,7 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.normal,
     height: 1.4,
-    color: color ?? AppColors.darkTextTertiary,
+    color: color,
   );
 
   // ============================================================
@@ -132,7 +132,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.3,
     letterSpacing: 0.1,
-    color: color ?? AppColors.darkTextSecondary,
+    color: color,
   );
 
   /// Label Medium
@@ -141,7 +141,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.3,
     letterSpacing: 0.1,
-    color: color ?? AppColors.darkTextSecondary,
+    color: color,
   );
 
   /// Label Small
@@ -150,7 +150,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.3,
     letterSpacing: 0.2,
-    color: color ?? AppColors.darkTextTertiary,
+    color: color,
   );
 
   // ============================================================
@@ -164,7 +164,7 @@ class AppTextStyles {
     fontWeight: FontWeight.normal,
     height: 1.6,
     letterSpacing: 0,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color,
   );
 
   /// Code Medium - Inline code
@@ -174,7 +174,7 @@ class AppTextStyles {
     fontWeight: FontWeight.normal,
     height: 1.5,
     letterSpacing: 0,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color,
   );
 
   /// Code Small - Code snippets
@@ -184,7 +184,7 @@ class AppTextStyles {
     fontWeight: FontWeight.normal,
     height: 1.5,
     letterSpacing: 0,
-    color: color ?? AppColors.darkTextPrimary,
+    color: color,
   );
 
   // ============================================================
@@ -220,7 +220,7 @@ class AppTextStyles {
     height: 1.7,
     letterSpacing: 0.2,
     fontStyle: FontStyle.italic,
-    color: color ?? AppColors.darkTextSecondary,
+    color: color,
   );
 
   /// Poetry Small - Poem metadata
@@ -230,7 +230,7 @@ class AppTextStyles {
     fontWeight: FontWeight.normal,
     height: 1.6,
     fontStyle: FontStyle.italic,
-    color: color ?? AppColors.darkTextTertiary,
+    color: color,
   );
 
   // ============================================================
@@ -242,7 +242,7 @@ class AppTextStyles {
     fontSize: 11,
     fontWeight: FontWeight.normal,
     height: 1.3,
-    color: color ?? AppColors.darkTextTertiary,
+    color: color,
   );
 
   /// Overline - For labels above content
@@ -251,7 +251,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.2,
     letterSpacing: 1.5,
-    color: color ?? AppColors.darkTextTertiary,
+    color: color,
   ).copyWith(
     // Make uppercase
     fontFeatures: [const FontFeature.enable('smcp')],
