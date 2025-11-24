@@ -128,8 +128,9 @@ class _GitHubFileBrowserState extends State<GitHubFileBrowser> {
         // Callback will handle navigation and data passing
         widget.onFileImported!(code);
         
-        // Pop all GitHub screens back to originating screen
-        Navigator.popUntil(context, (route) => route.isFirst);
+        // Pop all GitHub screens to return to CodeInputScreen
+        Navigator.pop(context); // Pop file browser
+        Navigator.pop(context); // Pop repository browser
       } else {
         // Fallback: Use popUntil to return to originating screen
         // Pop until we're back at the first route (originating screen)
