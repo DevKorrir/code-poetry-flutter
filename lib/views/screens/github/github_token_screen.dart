@@ -201,7 +201,7 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                   Text(
                     'Import code directly from your repositories',
                     style: AppTextStyles.bodyLarge(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -213,7 +213,7 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.1),
+                        color: AppColors.success.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: AppColors.success),
                       ),
@@ -240,21 +240,21 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                       labelText: 'GitHub Personal Access Token',
                       labelStyle: const TextStyle(color: Colors.white70),
                       hintText: 'ghp_xxxxxxxxxxxxxxxxxxxx',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Colors.white),
                       ),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+                      fillColor: Colors.white.withValues(alpha: 0.1),
                     ),
                     style: const TextStyle(color: Colors.white),
                     obscureText: true,
@@ -330,6 +330,11 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                           isLoading: _isLoading,
                           backgroundColor: Colors.white,
                           textColor: const Color(0xFF24292E),
+                          leadingIcon: const FaIcon(
+                            FontAwesomeIcons.github,
+                            size: 20,
+                            color: Color(0xFF24292E),
+                          ),
                           width: double.infinity,
                           height: 56,
                         ),
@@ -339,7 +344,7 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                           child: Text(
                             'Skip for now',
                             style: AppTextStyles.labelMedium(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                             ),
                           ),
                         ),
@@ -352,7 +357,7 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                   Text(
                     'We only request read access to your repositories',
                     style: AppTextStyles.caption(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                     textAlign: TextAlign.center,
                   ),

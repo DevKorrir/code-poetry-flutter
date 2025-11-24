@@ -117,6 +117,25 @@ class AuthViewModel extends ChangeNotifier {
       _setLoading(false);
       return false;
     }
+
+    _setLoading(true);
+    _clearMessages();
+
+    try {
+      _currentUser = await _authRepository.signUpWithEmail(
+        email: email,
+        password: password,
+        name: name,
+      );
+
+      // Send email verification after account creation
+      await _authRepository.sendEmailVerification();
+      _setSuccess('Account created! Please check your email to verify your account.');
+    } on AuthRepositoryException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return false;
+    }
   }
 
   // ============================================================
@@ -362,7 +381,7 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       await _authRepository.sendEmailVerification();
-      _setSuccess('Verification email sent!');
+      _setSuccess('Verification email sent! Please check your inbox.');
       _setLoading(false);
       return true;
     } on AuthRepositoryException catch (e) {
@@ -376,25 +395,43 @@ class AuthViewModel extends ChangeNotifier {
   // SIGN OUT & DELETION
   // ============================================================
 
-  /// Sign out
-  Future<bool> signOut() async {
+  /// Sign out current user
+  Future<void> signOut() async {
     _setLoading(true);
     _clearMessages();
 
     try {
       await _authRepository.signOut();
       _currentUser = null;
-      _setSuccess('Signed out successfully');
       _setLoading(false);
-      return true;
+      notifyListeners();
     } on AuthRepositoryException catch (e) {
       _setError(e.message);
       _setLoading(false);
+    }
+  }
+
+  /// Check if current user's email is verified
+  Future<bool> checkEmailVerification() async {
+    try {
+      final isVerified = await _authRepository.isEmailVerified();
+      if (isVerified) {
+        _setSuccess('Email verified successfully!');
+        // Reload user data to get updated verification status
+        _currentUser = _authRepository.currentUser;
+        notifyListeners();
+      }
+      return isVerified;
+    } catch (e) {
       return false;
     }
   }
 
-  /// Delete account
+  /// Get current user's email verification status
+  bool get isEmailVerified {
+    return _currentUser?.emailVerified ?? false;
+  }
+
   Future<bool> deleteAccount() async {
     _setLoading(true);
     _clearMessages();

@@ -7,7 +7,7 @@ import '../../../viewmodels/auth_viewmodel.dart';
 import '../../../core/services/storage_service.dart';
 import 'home/home_screen.dart';
 import 'onboarding_screen.dart';
-
+import 'auth/email_verification_screen.dart';
 /// Splash Screen
 /// First screen shown when app opens
 /// - Animated logo reveal
@@ -107,10 +107,16 @@ class _SplashScreenState extends State<SplashScreen>
       _navigateToOnboarding();
     } else if (isAuthenticated) {
       // User is logged in - go to home
-      _navigateToHome();
+      // Check if user needs email verification (for email/password users)
+      if (!authViewModel.isGuest && !authViewModel.isEmailVerified) {
+        // User is signed in but email not verified
+        _navigateToEmailVerification();
+      } else {
+        // User is verified or is a guest/OAuth user - go to home
+        _navigateToHome();
+      }
     } else {
-      // User has seen onboarding but not logged in - show onboarding again
-      // (they can skip to guest mode from there)
+      // User is not authenticated - show login
       _navigateToOnboarding();
     }
   }
@@ -147,22 +153,46 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+
+  void _navigateToEmailVerification() {
+    final authViewModel = context.read<AuthViewModel>();
+    final email = authViewModel.email ?? '';
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+        EmailVerificationScreen(email: email),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0D1117),
+              Color(0xFF161B22),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Animated Logo
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
+              ScaleTransition(
+                scale: _scaleAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
                   child: _buildLogo(),
                 ),
               ),
@@ -204,11 +234,11 @@ class _SplashScreenState extends State<SplashScreen>
       width: 150,
       height: 150,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -229,7 +259,7 @@ class _SplashScreenState extends State<SplashScreen>
             Icon(
               Icons.auto_awesome,
               size: 30,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ],
         ),
@@ -250,7 +280,7 @@ class _SplashScreenState extends State<SplashScreen>
         const SizedBox(height: 8),
         Text(
           'Where Logic Meets Emotion',
-          style: AppTextStyles.bodyLarge(color: Colors.white.withOpacity(0.9))
+          style: AppTextStyles.bodyLarge(color: Colors.white.withValues(alpha: 0.9))
               .copyWith(
             fontStyle: FontStyle.italic,
           ),

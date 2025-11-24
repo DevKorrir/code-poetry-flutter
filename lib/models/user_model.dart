@@ -7,6 +7,7 @@ class UserModel {
   final String? photoUrl;
   final bool isGuest;
   final bool isPro;
+  final bool emailVerified;
   final DateTime createdAt;
 
   UserModel({
@@ -17,6 +18,7 @@ class UserModel {
     this.isGuest = false,
     this.isPro = false,
     DateTime? createdAt,
+    this.emailVerified = false,
   }) : createdAt = createdAt ?? DateTime.now();
 
   // Create from Firebase User
@@ -32,6 +34,7 @@ class UserModel {
         photoUrl: user.photoURL,
         isGuest: isGuest || user.isAnonymous,
         isPro: isPro,
+        emailVerified: user.emailVerified,
         createdAt: user.metadata.creationTime ?? DateTime.now(),
       );
 
@@ -43,6 +46,7 @@ class UserModel {
     'photoUrl': photoUrl,
     'isGuest': isGuest,
     'isPro': isPro,
+    'emailVerified': emailVerified,
     'createdAt': createdAt.toIso8601String(),
   };
 
@@ -54,6 +58,7 @@ class UserModel {
     photoUrl: json['photoUrl'] as String?,
     isGuest: json['isGuest'] as bool? ?? false,
     isPro: json['isPro'] as bool? ?? false,
+    emailVerified: json['emailVerified'] as bool? ?? false,
     createdAt: DateTime.parse(json['createdAt'] as String),
   );
 
@@ -65,6 +70,7 @@ class UserModel {
     String? photoUrl,
     bool? isGuest,
     bool? isPro,
+    bool? emailVerified,
     DateTime? createdAt,
   }) =>
       UserModel(
@@ -74,6 +80,7 @@ class UserModel {
         photoUrl: photoUrl ?? this.photoUrl,
         isGuest: isGuest ?? this.isGuest,
         isPro: isPro ?? this.isPro,
+        emailVerified: emailVerified ?? this.emailVerified,
         createdAt: createdAt ?? this.createdAt,
       );
 }
