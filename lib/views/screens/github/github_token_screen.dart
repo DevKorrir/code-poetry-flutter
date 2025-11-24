@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/github_service.dart';
@@ -37,7 +38,7 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
       // Try to get user info to show username
       try {
         final user = await GitHubService().getCurrentUser();
-        if (user != null && mounted) {
+        if (mounted) {
           setState(() {
             _userName = user.login;
           });
@@ -75,14 +76,16 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
         // Get user info for display
         final user = await GitHubService().getCurrentUser();
 
+        if (!mounted) return;
+
         setState(() {
           _isConnected = true;
-          _userName = user?.login;
+          _userName = user.login;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Connected to GitHub as ${user?.login ?? "user"}!'),
+            content: Text('Connected to GitHub as ${user.login}!'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -177,10 +180,12 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.code_rounded,
-                      size: 40,
-                      color: Color(0xFF24292E),
+                    child: Center(
+                      child: FaIcon(
+                        FontAwesomeIcons.github,
+                        size: 40,
+                        color: const Color(0xFF24292E),
+                      ),
                     ),
                   ),
 
