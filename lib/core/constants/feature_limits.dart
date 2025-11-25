@@ -9,11 +9,11 @@ class FeatureLimits {
   // ============================================================
   
   /// Maximum number of poems a free user can generate per day
-  static const int freePoemsPerDay = 5;
-  
+  static const int freePoemsPerDay = 3;
+
   /// Number of poetry styles available to free users
   static const int freePoetryStyles = 4;
-  
+
   /// Whether free users can save poems
   static const bool freeSavePoems = true;
   
@@ -44,7 +44,7 @@ class FeatureLimits {
   
   /// Number of poetry styles available to pro users
   static const int proPoetryStyles = 4;
-  
+
   /// Whether pro users can save poems
   static const bool proSavePoems = true;
   

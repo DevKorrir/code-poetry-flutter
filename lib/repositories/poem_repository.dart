@@ -4,6 +4,7 @@ import '../models/poem_model.dart';
 import '../core/services/api_service.dart';
 import '../core/services/storage_service.dart';
 import '../core/services/connectivity_service.dart';
+import '../core/constants/feature_limits.dart';
 
 /// Poem Repository
 /// Mediates between ViewModels and Services
@@ -282,11 +283,8 @@ class PoemRepository {
 
     final todayCount = await getPoemsCreatedToday();
 
-    if (isGuest) {
-      return todayCount < 3; // 3 poems for guests
-    } else {
-      return todayCount < 5; // 5 poems for free users
-    }
+    // Both guests and free users have the same limit now
+    return todayCount < FeatureLimits.freePoemsPerDay;
   }
 
   /// Get remaining poems for today
@@ -297,7 +295,7 @@ class PoemRepository {
     if (isPro) return 999; // Unlimited
 
     final todayCount = await getPoemsCreatedToday();
-    final limit = isGuest ? 3 : 5;
+    final limit = FeatureLimits.freePoemsPerDay; // Same limit for guests and free users
 
     return (limit - todayCount).clamp(0, limit);
   }

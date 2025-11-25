@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/text_styles.dart';
@@ -9,7 +9,7 @@ import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
 import '../home/home_screen.dart';
 import 'login_screen.dart';
-
+import 'email_verification_screen.dart';
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -44,8 +44,13 @@ class _SignupScreenState extends State<SignupScreen> {
     );
 
     if (success && mounted) {
+      // Navigate to email verification screen
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (context) => EmailVerificationScreen(
+            email: _emailController.text.trim(),
+          ),
+        ),
       );
     } else if (mounted && authViewModel.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(

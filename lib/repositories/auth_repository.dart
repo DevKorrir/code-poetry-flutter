@@ -1,9 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import '../models/user_model.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/storage_service.dart';
+import '../core/services/secure_storage_service.dart';
 
 /// Authentication Repository
 /// Handles all authentication logic and user state management
@@ -289,12 +287,18 @@ class AuthRepository {
   // ============================================================
 
   /// Sign out current user
+  ///
+  /// IMPORTANT: This clears ALL local data (poems, settings, etc.) to prevent
+  /// data leakage between different user accounts. When the same user signs
+  /// back in, their data will be automatically restored from Firestore via
+  /// AuthViewModel._syncUserDataAfterLogin()
   Future<void> signOut() async {
     try {
       await _authService.signOut();
 
-      // Clear local user data
-      await _clearUserLocally();
+      // Clear ALL local user data to prevent data leakage between accounts
+      // Note: Data is restored from cloud when user logs back in
+      await _clearAllUserData();
     } on AuthException catch (e) {
       throw AuthRepositoryException(e.message);
     }
@@ -383,6 +387,42 @@ class AuthRepository {
     // Keep isPro in case user signs back in
   }
 
+  /// Clear ALL user data including poems, stats, and secure tokens
+  /// This prevents data leakage when switching between accounts
+  Future<void> _clearAllUserData() async {
+    // Clear basic user info
+    await _clearUserLocally();
+    
+    // Clear user-specific stats and settings
+    await _storageService.remove(StorageKeys.totalPoemsGenerated);
+    await _storageService.remove(StorageKeys.poemsGeneratedToday);
+    await _storageService.remove(StorageKeys.lastPoemDate);
+    await _storageService.remove(StorageKeys.lastSyncTime);
+    
+    // Clear all poems data
+    await _storageService.clearAllPoems();
+    
+    // Clear secure tokens (GitHub, Google, etc.)
+    await _clearSecureTokens();
+  }
+
+  /// Clear all secure tokens to prevent unauthorized access
+  Future<void> _clearSecureTokens() async {
+    try {
+      final secureStorage = SecureStorageService();
+      if (secureStorage.isInitialized) {
+        await secureStorage.delete(key: SecureStorageKeys.githubToken);
+        await secureStorage.delete(key: SecureStorageKeys.googleToken);
+        await secureStorage.delete(key: SecureStorageKeys.openaiApiKey);
+        // Note: We don't call deleteAll() to preserve any other secure data
+        // that might be unrelated to user authentication
+      }
+    } catch (e) {
+      // Log error but don't fail sign out
+      print('Warning: Failed to clear secure tokens: ${e.toString()}');
+    }
+  }
+
   /// Get locally saved user ID
   String? getLocalUserId() {
     return _storageService.getString(StorageKeys.userId);
@@ -443,6 +483,11 @@ class AuthRepository {
       case PasswordStrength.strong:
         return 'Strong password!';
     }
+  }
+
+  /// Get last sync time from storage
+  String? getLastSyncTime() {
+    return _storageService.getString(StorageKeys.lastSyncTime);
   }
 }
 

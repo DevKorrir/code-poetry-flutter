@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
+import '../repositories/poem_repository.dart';
 
 /// Authentication ViewModel
 /// Manages authentication state and operations
 class AuthViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
+  final PoemRepository? _poemRepository;
 
-  AuthViewModel(this._authRepository);
+  AuthViewModel(this._authRepository, {PoemRepository? poemRepository})
+      : _poemRepository = poemRepository;
 
   // ============================================================
   // STATE
@@ -65,6 +68,11 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> initialize() async {
     _currentUser = _authRepository.currentUser;
 
+    // If user is already logged in, sync their poems from cloud
+    if (_currentUser != null && !_currentUser!.isGuest) {
+      _syncUserDataAfterLogin();
+    }
+
     // Check for pending GitHub OAuth redirect result (web only)
     // On mobile, signInWithProvider() handles OAuth directly without redirects
     try {
@@ -72,6 +80,10 @@ class AuthViewModel extends ChangeNotifier {
       if (redirectUser != null) {
         _currentUser = redirectUser;
         _setSuccess('Connected with GitHub!');
+
+        // Sync poems after successful GitHub OAuth redirect
+        _syncUserDataAfterLogin();
+
         notifyListeners();
       }
     } catch (e) {
@@ -80,7 +92,14 @@ class AuthViewModel extends ChangeNotifier {
 
     // Listen to auth state changes
     _authRepository.authStateChanges.listen((user) {
+      final previousUser = _currentUser;
       _currentUser = user;
+
+      // If a new user just logged in (not a logout), sync their data
+      if (user != null && !user.isGuest && previousUser?.id != user.id) {
+        _syncUserDataAfterLogin();
+      }
+
       notifyListeners();
     });
   }
@@ -117,6 +136,25 @@ class AuthViewModel extends ChangeNotifier {
       _setLoading(false);
       return false;
     }
+
+    _setLoading(true);
+    _clearMessages();
+
+    try {
+      _currentUser = await _authRepository.signUpWithEmail(
+        email: email,
+        password: password,
+        name: name,
+      );
+
+      // Send email verification after account creation
+      await _authRepository.sendEmailVerification();
+      _setSuccess('Account created! Please check your email to verify your account.');
+    } on AuthRepositoryException catch (e) {
+      _setError(e.message);
+      _setLoading(false);
+      return false;
+    }
   }
 
   // ============================================================
@@ -143,6 +181,10 @@ class AuthViewModel extends ChangeNotifier {
 
       _setSuccess('Welcome back!');
       _setLoading(false);
+
+      // Sync user's poems from Firestore in the background
+      _syncUserDataAfterLogin();
+
       return true;
     } on AuthRepositoryException catch (e) {
       _setError(e.message);
@@ -161,6 +203,10 @@ class AuthViewModel extends ChangeNotifier {
 
       _setSuccess('Signed in with Google!');
       _setLoading(false);
+
+      // Sync user's poems from Firestore in the background
+      _syncUserDataAfterLogin();
+
       return true;
     } on AuthRepositoryException catch (e) {
       _setError(e.message);
@@ -179,6 +225,10 @@ class AuthViewModel extends ChangeNotifier {
 
       _setSuccess('Connected with GitHub!');
       _setLoading(false);
+
+      // Sync user's poems from Firestore in the background
+      _syncUserDataAfterLogin();
+
       return true;
     } on AuthRepositoryException catch (e) {
       _setError(e.message);
@@ -362,13 +412,84 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       await _authRepository.sendEmailVerification();
-      _setSuccess('Verification email sent!');
+      _setSuccess('Verification email sent! Please check your inbox.');
       _setLoading(false);
       return true;
     } on AuthRepositoryException catch (e) {
       _setError(e.message);
       _setLoading(false);
       return false;
+    }
+  }
+
+  // ============================================================
+  // USER DATA SYNC
+  // ============================================================
+
+  /// Sync user data from cloud after successful login
+  /// This restores poems that were saved to Firestore
+  Future<void> _syncUserDataAfterLogin() async {
+    if (_currentUser == null || _poemRepository == null) return;
+
+    try {
+      // Don't show loading or errors for background sync
+      await _poemRepository!.syncFromCloud(_currentUser!.id);
+    } catch (e) {
+      // Silently fail - sync errors shouldn't block login
+      debugPrint('Failed to sync poems from cloud: $e');
+    }
+  }
+
+  /// Manually sync poems from cloud
+  /// This can be called by the user to refresh their poems
+  Future<bool> syncPoemsFromCloud() async {
+    if (_currentUser == null || _currentUser!.isGuest) {
+      _setError('Please sign in to sync your poems');
+      return false;
+    }
+
+    if (_poemRepository == null) {
+      _setError('Sync not available');
+      return false;
+    }
+
+    _setLoading(true);
+    _clearMessages();
+
+    try {
+      await _poemRepository!.syncFromCloud(_currentUser!.id);
+      _setSuccess('Poems synced successfully!');
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setError('Failed to sync poems: ${e.toString()}');
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Get last sync time for display
+  String? getLastSyncTime() {
+    try {
+      final lastSyncTimeStr = _authRepository.getLastSyncTime();
+      if (lastSyncTimeStr == null) return null;
+
+      final lastSyncTime = DateTime.parse(lastSyncTimeStr);
+      final now = DateTime.now();
+      final difference = now.difference(lastSyncTime);
+
+      if (difference.inMinutes < 1) {
+        return 'Just now';
+      } else if (difference.inHours < 1) {
+        return '${difference.inMinutes} minutes ago';
+      } else if (difference.inDays < 1) {
+        return '${difference.inHours} hours ago';
+      } else {
+        return '${difference.inDays} days ago';
+      }
+    } catch (e) {
+      debugPrint('Error parsing last sync time: $e');
+      return null;
     }
   }
 
@@ -376,25 +497,43 @@ class AuthViewModel extends ChangeNotifier {
   // SIGN OUT & DELETION
   // ============================================================
 
-  /// Sign out
-  Future<bool> signOut() async {
+  /// Sign out current user
+  Future<void> signOut() async {
     _setLoading(true);
     _clearMessages();
 
     try {
       await _authRepository.signOut();
       _currentUser = null;
-      _setSuccess('Signed out successfully');
       _setLoading(false);
-      return true;
+      notifyListeners();
     } on AuthRepositoryException catch (e) {
       _setError(e.message);
       _setLoading(false);
+    }
+  }
+
+  /// Check if current user's email is verified
+  Future<bool> checkEmailVerification() async {
+    try {
+      final isVerified = await _authRepository.isEmailVerified();
+      if (isVerified) {
+        _setSuccess('Email verified successfully!');
+        // Reload user data to get updated verification status
+        _currentUser = _authRepository.currentUser;
+        notifyListeners();
+      }
+      return isVerified;
+    } catch (e) {
       return false;
     }
   }
 
-  /// Delete account
+  /// Get current user's email verification status
+  bool get isEmailVerified {
+    return _currentUser?.emailVerified ?? false;
+  }
+
   Future<bool> deleteAccount() async {
     _setLoading(true);
     _clearMessages();

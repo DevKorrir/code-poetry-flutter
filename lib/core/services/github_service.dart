@@ -34,9 +34,14 @@ class GitHubService {
   // ============================================================
 
   /// Get authenticated user info
-  Future<GitHubUser> getCurrentUser() async {
-    final response = await _makeRequest('/user');
-    return GitHubUser.fromJson(response);
+  Future<GitHubUser?> getCurrentUser() async {
+    try {
+      final response = await _makeRequest('/user');
+      return GitHubUser.fromJson(response);
+    } catch (e) {
+      // Return null if user info cannot be retrieved
+      return null;
+    }
   }
 
   // ============================================================

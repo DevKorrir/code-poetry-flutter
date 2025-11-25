@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/poem_model.dart';
 import '../repositories/poem_repository.dart';
+import '../core/constants/feature_limits.dart';
 
 /// Poem Generator ViewModel
 /// Manages state for poem generation flow
@@ -100,7 +101,11 @@ class PoemGeneratorViewModel extends ChangeNotifier {
         isGuest: isGuest,
         isPro: isPro,
       );
-      _setError('Daily limit reached. You have $remaining poems remaining today.');
+      if (remaining == 0) {
+        _setError('Daily limit reached! You\'ve used all ${FeatureLimits.freePoemsPerDay} poems today. Upgrade to Pro for unlimited poems.');
+      } else {
+        _setError('You have $remaining poems remaining today.');
+      }
       return false;
     }
 

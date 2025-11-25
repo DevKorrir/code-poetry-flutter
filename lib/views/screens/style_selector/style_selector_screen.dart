@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/constants/feature_limits.dart';
 import '../../../core/theme/text_styles.dart';
+import '../../../repositories/poem_repository.dart';
 import '../../../models/poetry_style_model.dart';
 import '../../../viewmodels/poem_generator_viewmodel.dart';
 import '../../../viewmodels/auth_viewmodel.dart';
@@ -27,6 +29,12 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  // Future for remaining poems - initialized once to prevent rebuilds
+  // This avoids calling poemRepository.getRemainingPoems() on every widget rebuild,
+  // which would be inefficient and could cause unnecessary API calls or database queries.
+  // The future is refreshed manually when poem count might change (e.g., after generating a poem).
+  late Future<int> _remainingPoemsFuture;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +49,14 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
       _currentPage = currentStyleIndex;
       _pageController.addListener(_onPageChanged);
     }
+
+    // Initialize the future for remaining poems
+    final authViewModel = context.read<AuthViewModel>();
+    final poemRepository = context.read<PoemRepository>();
+    _remainingPoemsFuture = poemRepository.getRemainingPoems(
+      isGuest: authViewModel.isGuest,
+      isPro: authViewModel.isPro,
+    );
   }
 
   void _setupAnimations() {
@@ -74,6 +90,19 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
     }
   }
 
+  /// Refresh the remaining poems future
+  /// Call this method when poem count might have changed
+  void _refreshRemainingPoems() {
+    final authViewModel = context.read<AuthViewModel>();
+    final poemRepository = context.read<PoemRepository>();
+    setState(() {
+      _remainingPoemsFuture = poemRepository.getRemainingPoems(
+        isGuest: authViewModel.isGuest,
+        isPro: authViewModel.isPro,
+      );
+    });
+  }
+
   Future<void> _generatePoem() async {
     final viewModel = context.read<PoemGeneratorViewModel>();
     final authViewModel = context.read<AuthViewModel>();
@@ -81,7 +110,7 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
     HapticFeedback.mediumImpact();
 
     // Navigate to poem display screen
-    Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
             PoemDisplayScreen(
@@ -105,6 +134,11 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
         },
       ),
     );
+
+    // Refresh poem counter when returning, as poem count may have changed
+    if (mounted) {
+      _refreshRemainingPoems();
+    }
   }
 
   @override
@@ -199,6 +233,89 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
             ),
 
             const SizedBox(height: 20),
+
+            // Poem counter (for non-pro users)
+            Consumer2<AuthViewModel, PoemRepository>(
+              builder: (context, authViewModel, poemRepository, child) {
+                if (authViewModel.isPro) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: FutureBuilder<int>(
+                    future: _remainingPoemsFuture,
+                    builder: (context, snapshot) {
+                      final remaining = snapshot.data ?? 0;
+                      final total = FeatureLimits.freePoemsPerDay;
+                      final used = total - remaining;
+
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: remaining > 0
+                              ? AppColors.info.withValues(alpha: 0.1)
+                              : AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: remaining > 0
+                                ? AppColors.info.withValues(alpha: 0.3)
+                                : AppColors.error.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              remaining > 0 ? Icons.auto_awesome : Icons.info_outline,
+                              color: remaining > 0 ? AppColors.info : AppColors.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    remaining > 0
+                                        ? 'Poems remaining today: $remaining'
+                                        : 'Daily limit reached',
+                                    style: AppTextStyles.labelMedium(
+                                      color: remaining > 0 ? AppColors.info : AppColors.error,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  LinearProgressIndicator(
+                                    value: used / total,
+                                    backgroundColor: Colors.grey.withValues(alpha: 0.3),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      remaining > 0 ? AppColors.info : AppColors.error,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (remaining == 0) ...[
+                              const SizedBox(width: 12),
+                              TextButton(
+                                onPressed: () {
+                                  // Navigate to pro upgrade
+                                  Navigator.pushNamed(context, '/pro_upgrade');
+                                },
+                                child: Text(
+                                  'Upgrade',
+                                  style: AppTextStyles.labelSmall(
+                                    color: AppColors.primaryStart,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 16),
 
             // Generate button
             Padding(
