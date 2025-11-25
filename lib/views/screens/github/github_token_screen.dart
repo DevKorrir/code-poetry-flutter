@@ -40,7 +40,7 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
         final user = await GitHubService().getCurrentUser();
         if (mounted) {
           setState(() {
-            _userName = user.login;
+            _userName = user?.login;
           });
         }
       } catch (e) {
@@ -80,12 +80,12 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
 
         setState(() {
           _isConnected = true;
-          _userName = user.login;
+          _userName = user?.login;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Connected to GitHub as ${user.login}!'),
+            content: Text('Connected to GitHub as ${user?.login ?? "user"}!'),
             backgroundColor: AppColors.success,
           ),
         );
