@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/constants/feature_limits.dart';
 import '../../../core/theme/text_styles.dart';
+import '../../../repositories/poem_repository.dart';
 import '../../../models/poetry_style_model.dart';
 import '../../../viewmodels/poem_generator_viewmodel.dart';
 import '../../../viewmodels/auth_viewmodel.dart';
@@ -199,6 +201,92 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
             ),
 
             const SizedBox(height: 20),
+
+            // Poem counter (for non-pro users)
+            Consumer2<AuthViewModel, PoemRepository>(
+              builder: (context, authViewModel, poemRepository, child) {
+                if (authViewModel.isPro) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: FutureBuilder<int>(
+                    future: poemRepository.getRemainingPoems(
+                      isGuest: authViewModel.isGuest,
+                      isPro: authViewModel.isPro,
+                    ),
+                    builder: (context, snapshot) {
+                      final remaining = snapshot.data ?? 0;
+                      final total = FeatureLimits.freePoemsPerDay;
+                      final used = total - remaining;
+
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: remaining > 0
+                              ? AppColors.info.withValues(alpha: 0.1)
+                              : AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: remaining > 0
+                                ? AppColors.info.withValues(alpha: 0.3)
+                                : AppColors.error.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              remaining > 0 ? Icons.auto_awesome : Icons.info_outline,
+                              color: remaining > 0 ? AppColors.info : AppColors.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    remaining > 0
+                                        ? 'Poems remaining today: $remaining'
+                                        : 'Daily limit reached',
+                                    style: AppTextStyles.labelMedium(
+                                      color: remaining > 0 ? AppColors.info : AppColors.error,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  LinearProgressIndicator(
+                                    value: used / total,
+                                    backgroundColor: Colors.grey.withValues(alpha: 0.3),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      remaining > 0 ? AppColors.info : AppColors.error,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (remaining == 0) ...[
+                              const SizedBox(width: 12),
+                              TextButton(
+                                onPressed: () {
+                                  // Navigate to pro upgrade
+                                  Navigator.pushNamed(context, '/pro_upgrade');
+                                },
+                                child: Text(
+                                  'Upgrade',
+                                  style: AppTextStyles.labelSmall(
+                                    color: AppColors.primaryStart,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 16),
 
             // Generate button
             Padding(
