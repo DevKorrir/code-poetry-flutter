@@ -488,6 +488,7 @@ class AuthViewModel extends ChangeNotifier {
         return '${difference.inDays} days ago';
       }
     } catch (e) {
+      debugPrint('Error parsing last sync time: $e');
       return null;
     }
   }

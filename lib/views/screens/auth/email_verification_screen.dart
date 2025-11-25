@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
@@ -29,6 +30,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
 
   bool _isCheckingVerification = false;
   int _resendCooldown = 0;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -71,16 +73,20 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
   }
 
   void _countdownTimer() {
-    if (_resendCooldown > 0) {
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted) {
-          setState(() {
-            _resendCooldown--;
-          });
-          _countdownTimer();
-        }
-      });
-    }
+    _timer?.cancel(); // Cancel any existing timer
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendCooldown > 0) {
+        setState(() {
+          _resendCooldown--;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   Future<void> _checkEmailVerification() async {
@@ -156,6 +162,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
 
   @override
   void dispose() {
+    _timer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
