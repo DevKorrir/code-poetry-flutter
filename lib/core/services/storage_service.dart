@@ -173,6 +173,9 @@ class StorageService {
         final poem = PoemModel.fromJson(doc.data());
         await savePoem(poem);
       }
+
+      // Record the sync time
+      await saveString(StorageKeys.lastSyncTime, DateTime.now().toIso8601String());
     } catch (e) {
       throw StorageException('Failed to sync from cloud: ${e.toString()}');
     }

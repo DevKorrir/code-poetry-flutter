@@ -78,7 +78,7 @@ void main() async {
 
         // ViewModels
         ChangeNotifierProvider<AuthViewModel>(
-          create: (_) => AuthViewModel(authRepository)..initialize(),
+          create: (_) => AuthViewModel(authRepository, poemRepository: poemRepository)..initialize(),
         ),
         ChangeNotifierProvider<HomeViewModel>(
           create: (_) => HomeViewModel(poemRepository)..initialize(),

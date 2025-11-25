@@ -287,11 +287,17 @@ class AuthRepository {
   // ============================================================
 
   /// Sign out current user
+  ///
+  /// IMPORTANT: This clears ALL local data (poems, settings, etc.) to prevent
+  /// data leakage between different user accounts. When the same user signs
+  /// back in, their data will be automatically restored from Firestore via
+  /// AuthViewModel._syncUserDataAfterLogin()
   Future<void> signOut() async {
     try {
       await _authService.signOut();
 
       // Clear ALL local user data to prevent data leakage between accounts
+      // Note: Data is restored from cloud when user logs back in
       await _clearAllUserData();
     } on AuthException catch (e) {
       throw AuthRepositoryException(e.message);
@@ -477,6 +483,11 @@ class AuthRepository {
       case PasswordStrength.strong:
         return 'Strong password!';
     }
+  }
+
+  /// Get last sync time from storage
+  String? getLastSyncTime() {
+    return _storageService.getString(StorageKeys.lastSyncTime);
   }
 }
 
