@@ -128,18 +128,61 @@ class _GitHubFileBrowserState extends State<GitHubFileBrowser> {
         // Callback will handle navigation and data passing
         widget.onFileImported!(code);
         
-        // Pop all GitHub screens to return to CodeInputScreen
-        Navigator.pop(context); // Pop file browser
-        Navigator.pop(context); // Pop repository browser
-      } else {
-        // Fallback: Use popUntil to return to originating screen
-        // Pop until we're back at the first route (originating screen)
+        // Pop back to the screen that initiated the GitHub flow
+        // This replaces the brittle approach of multiple Navigator.pop() calls
+        // with a robust Navigator.popUntil() that identifies the target route
+
+        int githubScreenCount = 0;
         Navigator.popUntil(context, (route) {
-          // Check if this is the second-to-last route
-          // (we want to keep the originating screen)
-          return route.isFirst || 
-                 (route.settings.arguments == null && 
-                  route.settings.name == null);
+          // Count how many GitHub-related screens we need to pop through
+          // This is more reliable than fixed pop() calls
+
+          if (route.isFirst) {
+            // We've reached the root - stop here
+            return true;
+          }
+
+          // Check if this route is likely a GitHub screen by examining the builder
+          // This is more robust than string matching
+          try {
+            final settings = route.settings;
+
+            // If this route has arguments that indicate it's a GitHub screen
+            if (settings.arguments is GitHubRepository) {
+              githubScreenCount++;
+              return false; // Continue popping
+            }
+
+            // If we haven't found any GitHub screens yet, we might be at the target
+            if (githubScreenCount == 0) {
+              return true; // Stop popping - we're likely at the originating screen
+            }
+
+            // If we've seen GitHub screens and now we're at a different screen type
+            return true; // Stop popping
+          } catch (e) {
+            // Fallback: if we can't determine the route type, stop popping
+            return true;
+          }
+        });
+      } else {
+        // Fallback: Return to originating screen with result
+        // Use the same robust popUntil approach as the callback version
+        Navigator.popUntil(context, (route) {
+          if (route.isFirst) {
+            return true; // Stop at root route
+          }
+
+          // Use the same logic as the callback approach for consistency
+          try {
+            final settings = route.settings;
+            if (settings.arguments is GitHubRepository) {
+              return false; // Continue popping through GitHub screens
+            }
+            return true; // Stop at non-GitHub screen
+          } catch (e) {
+            return true; // Fallback: stop popping
+          }
         });
         
         // Return the code to the originating screen
