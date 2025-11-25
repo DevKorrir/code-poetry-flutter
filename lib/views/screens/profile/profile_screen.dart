@@ -478,14 +478,28 @@ class ProfileScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
+              Navigator.pop(context); // Close dialog first
+
+              // Clear any previous error messages
+              authViewModel.clearMessages();
+
               await authViewModel.signOut();
               if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
-                      (route) => false,
-                );
+                if (authViewModel.error != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Sign out failed: ${authViewModel.error!}'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                        (route) => false,
+                  );
+                }
               }
             },
             child: const Text('Sign Out'),

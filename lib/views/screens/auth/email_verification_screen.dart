@@ -130,15 +130,28 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
     }
   }
 
-  void _signOut() {
+  void _signOut() async {
     final authViewModel = context.read<AuthViewModel>();
-    authViewModel.signOut().then((_) {
-      if (mounted) {
+
+    // Clear any previous error messages
+    authViewModel.clearMessages();
+
+    await authViewModel.signOut();
+
+    if (mounted) {
+      if (authViewModel.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign out failed: ${authViewModel.error!}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      } else {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       }
-    });
+    }
   }
 
   @override
