@@ -29,6 +29,12 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  // Future for remaining poems - initialized once to prevent rebuilds
+  // This avoids calling poemRepository.getRemainingPoems() on every widget rebuild,
+  // which would be inefficient and could cause unnecessary API calls or database queries.
+  // The future is refreshed manually when poem count might change (e.g., after generating a poem).
+  late Future<int> _remainingPoemsFuture;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +49,14 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
       _currentPage = currentStyleIndex;
       _pageController.addListener(_onPageChanged);
     }
+
+    // Initialize the future for remaining poems
+    final authViewModel = context.read<AuthViewModel>();
+    final poemRepository = context.read<PoemRepository>();
+    _remainingPoemsFuture = poemRepository.getRemainingPoems(
+      isGuest: authViewModel.isGuest,
+      isPro: authViewModel.isPro,
+    );
   }
 
   void _setupAnimations() {
@@ -76,6 +90,19 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
     }
   }
 
+  /// Refresh the remaining poems future
+  /// Call this method when poem count might have changed
+  void _refreshRemainingPoems() {
+    final authViewModel = context.read<AuthViewModel>();
+    final poemRepository = context.read<PoemRepository>();
+    setState(() {
+      _remainingPoemsFuture = poemRepository.getRemainingPoems(
+        isGuest: authViewModel.isGuest,
+        isPro: authViewModel.isPro,
+      );
+    });
+  }
+
   Future<void> _generatePoem() async {
     final viewModel = context.read<PoemGeneratorViewModel>();
     final authViewModel = context.read<AuthViewModel>();
@@ -83,7 +110,7 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
     HapticFeedback.mediumImpact();
 
     // Navigate to poem display screen
-    Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
             PoemDisplayScreen(
@@ -107,6 +134,11 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
         },
       ),
     );
+
+    // Refresh poem counter when returning, as poem count may have changed
+    if (mounted) {
+      _refreshRemainingPoems();
+    }
   }
 
   @override
@@ -210,10 +242,7 @@ class _StyleSelectorScreenState extends State<StyleSelectorScreen>
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: FutureBuilder<int>(
-                    future: poemRepository.getRemainingPoems(
-                      isGuest: authViewModel.isGuest,
-                      isPro: authViewModel.isPro,
-                    ),
+                    future: _remainingPoemsFuture,
                     builder: (context, snapshot) {
                       final remaining = snapshot.data ?? 0;
                       final total = FeatureLimits.freePoemsPerDay;
