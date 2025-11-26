@@ -105,9 +105,9 @@ Launch → Onboarding → Auth → Home → Create Poem
 
 <div align="center">
 
-| Onboarding | Style Selector | Poem Display |
+| Onboarding | Token Input | Poem Display |
 |:---:|:---:|:---:|
-| ![Onboarding](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/onboarding.png) | ![Styles](https://via.placeholder.com/250x500/4facfe/ffffff?text=Style+Selector) | ![Poem](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/poem_display.png) |
+| ![Onboarding](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/onboarding.png) | ![Styles](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/gihubconnect.png) | ![Poem](https://github.com/DevKorrir/code-poetry-flutter/blob/main/screenshots/poem_display.png) |
 
 | Home Dashboard | Code Input | Gallery |
 |:---:|:---:|:---:|
