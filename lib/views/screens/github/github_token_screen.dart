@@ -167,11 +167,18 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
       body: Container(
         color: const Color(0xFF0D1117),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                   // GitHub logo
                   Container(
                     width: 80,
@@ -361,9 +368,12 @@ class _GitHubTokenScreenState extends State<GitHubTokenScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                ],
-              ),
-            ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
