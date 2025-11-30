@@ -62,91 +62,100 @@ class _GitHubConnectScreenState extends State<GitHubConnectScreen> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                   // GitHub logo
-                   Container(
-                     width: 100,
-                     height: 100,
-                     decoration: BoxDecoration(
-                       color: Colors.white,
-                       shape: BoxShape.circle,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                         // GitHub logo
+                         Container(
+                           width: 100,
+                           height: 100,
+                           decoration: BoxDecoration(
+                             color: Colors.white,
+                             shape: BoxShape.circle,
+                           ),
+                           child: Center(
+                             child: FaIcon(
+                               FontAwesomeIcons.github,
+                               size: 50,
+                               color: const Color(0xFF24292E),
+                             ),
+                           ),
+                         ),
+
+                         const SizedBox(height: 32),
+
+                         Text(
+                           'Connect GitHub',
+                           style: AppTextStyles.h2(color: Colors.white),
+                         ),
+
+                         const SizedBox(height: 16),
+
+                         Text(
+                           'Import code directly from your repositories',
+                           style: AppTextStyles.bodyLarge(
+                             color: Colors.white.withValues(alpha: 0.8),
+                           ),
+                           textAlign: TextAlign.center,
+                         ),
+
+                         const SizedBox(height: 48),
+
+                         // Benefits
+                         _buildBenefit('✓ One-tap sign in'),
+                         _buildBenefit('✓ Secure OAuth connection'),
+                         _buildBenefit('✓ Browse all repositories'),
+                         _buildBenefit('✓ No tokens to manage'),
+
+                         const SizedBox(height: 32),
+
+                         // Connect Button
+                         CustomButton(
+                           text: 'Connect with GitHub',
+                           onPressed: _isLoading ? null : _connectGitHub,
+                           isLoading: _isLoading,
+                           backgroundColor: Colors.white,
+                           textColor: const Color(0xFF24292E),
+                           width: double.infinity,
+                           height: 56,
+                           leadingIcon: const FaIcon(FontAwesomeIcons.github, size: 24),
+                           isGradient: false,
+                         ),
+
+                         const SizedBox(height: 16),
+
+                         TextButton(
+                           onPressed: () => Navigator.pop(context),
+                           child: Text(
+                             'Skip for now',
+                             style: AppTextStyles.labelMedium(
+                               color: Colors.white.withValues(alpha: 0.7),
+                             ),
+                           ),
+                         ),
+
+                         const SizedBox(height: 24),
+
+                         // Info
+                         Text(
+                           'We only request read access to your repositories',
+                           style: AppTextStyles.caption(
+                             color: Colors.white.withValues(alpha: 0.5),
+                           ),
+                           textAlign: TextAlign.center,
+                         ),
+                       ],
                      ),
-                     child: Center(
-                       child: FaIcon(
-                         FontAwesomeIcons.github,
-                         size: 50,
-                         color: const Color(0xFF24292E),
-                       ),
-                     ),
                    ),
-
-                   const SizedBox(height: 32),
-
-                   Text(
-                     'Connect GitHub',
-                     style: AppTextStyles.h2(color: Colors.white),
-                   ),
-
-                   const SizedBox(height: 16),
-
-                   Text(
-                     'Import code directly from your repositories',
-                     style: AppTextStyles.bodyLarge(
-                       color: Colors.white.withOpacity(0.8),
-                     ),
-                     textAlign: TextAlign.center,
-                   ),
-
-                   const SizedBox(height: 48),
-
-                   // Benefits
-                   _buildBenefit('✓ One-tap sign in'),
-                   _buildBenefit('✓ Secure OAuth connection'),
-                   _buildBenefit('✓ Browse all repositories'),
-                   _buildBenefit('✓ No tokens to manage'),
-
-                   const SizedBox(height: 32),
-
-                   // Connect Button
-                   CustomButton(
-                     text: 'Connect with GitHub',
-                     onPressed: _isLoading ? null : _connectGitHub,
-                     isLoading: _isLoading,
-                     backgroundColor: Colors.white,
-                     textColor: const Color(0xFF24292E),
-                     width: double.infinity,
-                     height: 56,
-                     leadingIcon: const FaIcon(FontAwesomeIcons.github, size: 24),
-                     isGradient: false,
-                   ),
-
-                   const SizedBox(height: 16),
-
-                   TextButton(
-                     onPressed: () => Navigator.pop(context),
-                     child: Text(
-                       'Skip for now',
-                       style: AppTextStyles.labelMedium(
-                         color: Colors.white.withOpacity(0.7),
-                       ),
-                     ),
-                   ),
-
-                   const SizedBox(height: 24),
-
-                   // Info
-                   Text(
-                     'We only request read access to your repositories',
-                     style: AppTextStyles.caption(
-                       color: Colors.white.withOpacity(0.5),
-                     ),
-                     textAlign: TextAlign.center,
-                   ),
-                 ],
-               ),
+                 );
+               },
              ),
            ),
          ),
@@ -168,7 +177,7 @@ class _GitHubConnectScreenState extends State<GitHubConnectScreen> {
            Text(
              text,
              style: AppTextStyles.bodyMedium(
-               color: Colors.white.withOpacity(0.9),
+               color: Colors.white.withValues(alpha: 0.9),
              ),
            ),
          ],
