@@ -1,0 +1,53 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on tags like v1.0.0, v1.1.0, etc.
+
+jobs:
+  build-release-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repo
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Install Flutter
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.13.0'  # Adjust to your Flutter version
+
+    # Step 3: Get dependencies
+    - name: Flutter Pub Get
+      run: flutter pub get
+
+    # Step 4: Build release APK
+    - name: Build APK
+      run: flutter build apk --release
+
+    # Step 5: Generate changelog from commits
+    - name: Generate Changelog
+      id: changelog
+      run: |
+        # Get the previous tag
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^)
+        echo "Previous tag: $PREV_TAG"
+        
+        # Get commit messages since previous tag
+        CHANGELOG=$(git log $PREV_TAG..HEAD --pretty=format:"- %s")
+        echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+        echo "$CHANGELOG" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # Step 6: Create GitHub Release with APK attached
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/app/outputs/flutter-apk/app-release.apk
+        body: ${{ env.CHANGELOG }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
