@@ -19,11 +19,27 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          channel: 'stable'
 
       # Step 3: Install dependencies
       - name: Install dependencies
         run: flutter pub get
+
+      # Step 3.5: Setup Android Signing
+      - name: Setup Android Signing
+        run: |
+           if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+             echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+             echo "storePassword=$ANDROID_STORE_PASSWORD" > android/key.properties
+             echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/key.properties
+             echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/key.properties
+             echo "storeFile=upload-keystore.jks" >> android/key.properties
+           fi
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
 
       # Step 4: Build release APK
       - name: Build release APK
