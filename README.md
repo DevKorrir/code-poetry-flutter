@@ -11,8 +11,9 @@
 [![Firebase](https://img.shields.io/badge/Firebase-Latest-FFCA28?logo=firebase)](https://firebase.google.com)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?logo=google)](https://ai.google.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Download](https://img.shields.io/badge/Download-APK-blue?logo=android)](https://github.com/DevKorrir/code-poetry-flutter/releases)
 
-[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack)
+[Download](#-download) • [Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack)
 
 </div>
 
@@ -36,6 +37,14 @@ Code Poetry analyzes your code and generates beautiful poetry in multiple styles
 - **Sonnet** - Classical 14-line structured verses
 - **Free Verse** - Creative, flowing expressions
 - **Cyberpunk** - Futuristic, edgy tech-noir poetry
+
+---
+
+## 📥 Download
+
+**Get the latest Android APK directly:**
+
+[![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge&logo=android)](https://github.com/DevKorrir/code-poetry-flutter/releases)
 
 ---
 
